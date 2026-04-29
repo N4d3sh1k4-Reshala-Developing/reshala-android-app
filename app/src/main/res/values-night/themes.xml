@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash Screen Theme (Dark) -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_reshala_logo_dark</item>
+        <item name="windowSplashScreenBackground">@color/splash_bg_dark</item>
+        <item name="postSplashScreenTheme">@style/Theme.ReshalaAlfa01</item>
+    </style>
+</resources>

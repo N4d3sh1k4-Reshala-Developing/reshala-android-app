@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="reshala_dark_blue">#0A1E4B</color>
+    <color name="reshala_grey_blue">#8A92AC</color>
+    <color name="splash_bg_light">#F8F9FF</color>
+    <color name="splash_bg_dark">#101217</color>
+</resources>
