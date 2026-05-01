@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.UserData
 import com.bignerdranch.android.reshalaalfa01.ui.theme.ReshalaAlfa01Theme
+import com.bignerdranch.android.reshalaalfa01.ui.theme.ReshalaDarkBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,9 +35,17 @@ fun HomeScreen(
     var showProfileMenu by remember { mutableStateOf(false) }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background, // Явно задаем фон
         topBar = {
-            TopAppBar(
-                title = { Text("Reshala App") },
+            CenterAlignedTopAppBar( // Центрированный заголовок выглядит более современно
+                title = { 
+                    Text(
+                        "Reshala", 
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    ) 
+                },
                 actions = {
                     Box(modifier = Modifier.padding(end = 16.dp)) {
                         Row(
@@ -56,12 +65,12 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                    .background(ReshalaDarkBlue), // Цвет из логотипа
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = userData?.username?.firstOrNull()?.uppercase() ?: "?",
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    color = Color.White,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -115,20 +124,30 @@ fun HomeScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                val recentHistory = history.take(3)
+                val groupedRecent = recentHistory.groupBy { formatToDate(it.createdAt) }
+
+                groupedRecent.forEach { (date, itemsList) ->
                     item {
                         Text(
-                            "Recent History",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(bottom = 4.dp)
+                            text = date,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                         )
                     }
-                    
-                    val recentHistory = history.take(3)
-                    items(recentHistory) { item ->
-                        Box(modifier = Modifier.clickable { onTaskClick(item.id) }) {
+                    items(itemsList) { item ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(MaterialTheme.shapes.large)
+                                .clickable { onTaskClick(item.id) }
+                        ) {
                             HistoryItemCard(item)
                         }
                     }
+                }
                     
                     if (history.size > 3) {
                         item {
@@ -137,7 +156,11 @@ fun HomeScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 TextButton(onClick = onShowMoreClick) {
-                                    Text("Show more")
+                                    Text(
+                                        "Show more",
+                                        color = ReshalaDarkBlue,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
                             }
                         }

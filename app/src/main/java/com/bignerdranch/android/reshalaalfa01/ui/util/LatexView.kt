@@ -1,5 +1,6 @@
 package com.bignerdranch.android.reshalaalfa01.ui.util
 
+import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -64,6 +65,7 @@ fun LatexText(
                     font-size: ${fontSize}px;
                     border-radius: 8px;
                     box-sizing: border-box;
+                    font-weight: 500;
                 }
                 #math { 
                     width: 100%; 
@@ -91,11 +93,20 @@ fun LatexText(
                     
                     try {
                         if (${isDisplayMode}) {
-                            katex.render(rawTex, el, { 
-                                displayMode: true, 
-                                throwOnError: false,
-                                trust: true 
-                            });
+                            try {
+                                katex.render(rawTex, el, { 
+                                    displayMode: true, 
+                                    throwOnError: true,
+                                    trust: true 
+                                });
+                            } catch (err) {
+                                el.style.color = '#888888';
+                                el.style.textAlign = 'center';
+                                el.style.fontSize = '0.8em';
+                                el.style.padding = '8px';
+                                el.innerHTML = '<div style="margin-bottom: 4px;">⚠️ Invalid formula structure</div>' + 
+                                             '<code style="font-size: 0.7em; opacity: 0.7; word-break: break-all;">' + rawTex + '</code>';
+                            }
                         } else {
                             el.innerHTML = rawTex;
                             renderMathInElement(el, {
@@ -123,6 +134,9 @@ fun LatexText(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
+                // Отключаем аппаратное ускорение для стабильности в списках
+                setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+
                 settings.javaScriptEnabled = true
                 setBackgroundColor(0) 
                 webViewClient = WebViewClient()

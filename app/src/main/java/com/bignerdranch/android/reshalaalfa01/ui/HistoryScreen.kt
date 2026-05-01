@@ -8,7 +8,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
 
@@ -20,9 +23,16 @@ fun HistoryScreen(
     onBackClick: () -> Unit
 ) {
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text("Full History") },
+            CenterAlignedTopAppBar(
+                title = { 
+                    Text(
+                        "History", 
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -31,6 +41,10 @@ fun HistoryScreen(
             )
         }
     ) { padding ->
+        val groupedHistory = remember(history) {
+            history.groupBy { formatToDate(it.createdAt) }
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -38,9 +52,25 @@ fun HistoryScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(history) { item ->
-                Box(modifier = Modifier.clickable { onTaskClick(item.id) }) {
-                    HistoryItemCard(item)
+            groupedHistory.forEach { (date: String, itemsList: List<RecognitionEntity>) ->
+                item {
+                    Text(
+                        text = date,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+                }
+                items(itemsList) { item ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.large)
+                            .clickable { onTaskClick(item.id) }
+                    ) {
+                        HistoryItemCard(item)
+                    }
                 }
             }
         }
