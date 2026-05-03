@@ -38,9 +38,9 @@ jobs:
           API_URL: ${{ secrets.API_URL }}
           SUPPORT_EMAIL: ${{ secrets.SUPPORT_EMAIL }}
           YANDEX_CLIENT_ID: ${{ secrets.YANDEX_CLIENT_ID }}
-          SCHEME: ${{ secret.SCHEME }}
-          HOST: ${{ secret.HOST }}
-          PORT: ${{ secret.PORT }}
+          SCHEME: ${{ secrets.SCHEME }}
+          HOST: ${{ secrets.HOST }}
+          PORT: ${{ secrets.PORT }}
 
 
       - name: Upload APK
