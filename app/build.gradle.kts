@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.ksp)
@@ -5,24 +7,54 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+fun getSecret(key: String, local: Properties): String {
+    return System.getenv(key) ?: local.getProperty(key) ?: ""
+}
+
 android {
     namespace = "com.bignerdranch.android.reshalaalfa01"
-    compileSdk = 36
+    compileSdk = 35
+
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(localPropertiesFile.inputStream())
+    }
 
     defaultConfig {
         applicationId = "com.bignerdranch.android.reshalaalfa01"
         minSdk = 31
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "alfa_0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        manifestPlaceholders["YANDEX_CLIENT_ID"] = "5e58d1a8f2f141df8928574f01b6e152"
+
+        val apiUrl = getSecret("API_URL", localProperties)
+        val supportEmail = getSecret("SUPPORT_EMAIL", localProperties)
+
+        buildConfigField("String", "BASE_URL", "\"$apiUrl\"")
+        buildConfigField("String", "SUPPORT_EMAIL", "\"$supportEmail\"")
+
+        manifestPlaceholders["YANDEX_CLIENT_ID"] = getSecret("YANDEX_CLIENT_ID", localProperties)
+        manifestPlaceholders["SCHEME"] = getSecret("SCHEME", localProperties)
+        manifestPlaceholders["HOST"] = getSecret("HOST", localProperties)
+        manifestPlaceholders["PORT"] = getSecret("PORT", localProperties)
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("KEYSTORE_PATH") ?: "release.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: localProperties.getProperty("STORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS") ?: localProperties.getProperty("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD") ?: localProperties.getProperty("KEY_PASSWORD")
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -35,6 +67,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
@@ -48,6 +81,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.androidx.compose.material.icons.extended)
     
@@ -59,6 +93,12 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.extensions)
 
     implementation(libs.authsdk)
     

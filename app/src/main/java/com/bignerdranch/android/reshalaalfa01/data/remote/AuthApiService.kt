@@ -1,6 +1,7 @@
 package com.bignerdranch.android.reshalaalfa01.data.remote
 
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.*
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -37,4 +38,24 @@ interface AuthApiService {
 
     @GET("recognition/data/history")
     suspend fun getRecognitionHistory(@Header("Authorization") token: String): Response<RecognitionHistoryResponse>
+
+    @Multipart
+    @POST("recognition/process")
+    suspend fun processImage(
+        @Header("Authorization") token: String,
+        @Part file: MultipartBody.Part
+    ): Response<RecognitionResponse>
+
+    @GET("recognition/{task_id}")
+    suspend fun getRecognitionStatus(
+        @Header("Authorization") token: String,
+        @Path("task_id") taskId: String
+    ): Response<RecognitionResponse>
+
+    @POST("recognition/{task_id}/feedback")
+    suspend fun sendFeedback(
+        @Header("Authorization") token: String,
+        @Path("task_id") taskId: String,
+        @Body request: FeedbackRequest
+    ): Response<Unit>
 }

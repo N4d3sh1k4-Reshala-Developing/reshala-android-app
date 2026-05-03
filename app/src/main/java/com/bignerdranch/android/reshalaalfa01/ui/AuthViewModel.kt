@@ -87,6 +87,8 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _isRefreshing.value = true
             repository.fetchAndSaveHistory()
+            // Даем KaTeX немного времени на отрисовку в WebView
+            delay(1000)
             _isRefreshing.value = false
         }
     }

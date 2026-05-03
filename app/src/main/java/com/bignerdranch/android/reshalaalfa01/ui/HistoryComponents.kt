@@ -3,6 +3,8 @@ package com.bignerdranch.android.reshalaalfa01.ui
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,51 +46,42 @@ fun HistoryItemCard(item: RecognitionEntity) {
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                StatusBadge(item.status)
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    StatusBadge(item.status)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Filled.ChevronRight,
+                        contentDescription = "View details",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            if (!item.originalResult.isNullOrBlank()) {
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                    shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(
-                            text = "Original:",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                        )
-                        LatexText(
-                            latex = item.originalResult,
-                            isDisplayMode = true,
-                            showBackground = false,
-                            modifier = Modifier.heightIn(min = 40.dp, max = 100.dp)
-                        )
-                    }
-                }
-            }
+            val displayLatex = if (!item.editedResult.isNullOrBlank()) item.editedResult else item.originalResult
             
-            if (!item.editedResult.isNullOrBlank() && item.editedResult != item.originalResult) {
-                Spacer(modifier = Modifier.height(8.dp))
+            if (!displayLatex.isNullOrBlank()) {
+                val isError = item.status == "FAILED" || displayLatex.startsWith("Error:")
+                val isEdited = !item.editedResult.isNullOrBlank()
+                
                 Surface(
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                    color = when {
+                        isError -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
+                        isEdited -> MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    },
                     shape = MaterialTheme.shapes.medium,
                     modifier = Modifier.fillMaxWidth(),
-                    border = androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    border = if (isEdited && !isError) 
+                        androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        else null
                 ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        Text(
-                            text = "Edited:",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                    Box(modifier = Modifier.padding(12.dp)) {
                         LatexText(
-                            latex = item.editedResult,
+                            latex = displayLatex,
                             isDisplayMode = true,
                             showBackground = false,
                             modifier = Modifier.heightIn(min = 40.dp, max = 100.dp)

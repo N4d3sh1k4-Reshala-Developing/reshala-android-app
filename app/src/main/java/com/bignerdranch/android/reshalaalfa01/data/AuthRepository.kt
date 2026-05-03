@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import okhttp3.MultipartBody
 import retrofit2.Response
 
 class AuthRepository(
@@ -206,6 +207,48 @@ class AuthRepository(
         } catch (e: Exception) {
             tokenManager.clearAccessToken()
             recognitionDao.clearAll()
+            Result.failure(e)
+        }
+    }
+
+    suspend fun processImage(file: MultipartBody.Part): Result<RecognitionResponse> {
+        return try {
+            val token = accessToken.firstOrNull() ?: return Result.failure(Exception("No token"))
+            val response = apiService.processImage("Bearer $token", file)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Process image failed: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getRecognitionStatus(taskId: String): Result<RecognitionResponse> {
+        return try {
+            val token = accessToken.firstOrNull() ?: return Result.failure(Exception("No token"))
+            val response = apiService.getRecognitionStatus("Bearer $token", taskId)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Get status failed: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun sendFeedback(taskId: String, editStatus: String, editedResult: String? = null): Result<Unit> {
+        return try {
+            val token = accessToken.firstOrNull() ?: return Result.failure(Exception("No token"))
+            val response = apiService.sendFeedback("Bearer $token", taskId, FeedbackRequest(editStatus, editedResult))
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Send feedback failed: ${response.code()}"))
+            }
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

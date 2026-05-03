@@ -8,14 +8,21 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.UserData
 import com.bignerdranch.android.reshalaalfa01.ui.theme.ReshalaAlfa01Theme
@@ -35,13 +42,25 @@ fun HomeScreen(
     var showProfileMenu by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background, // Явно задаем фон
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            CenterAlignedTopAppBar( // Центрированный заголовок выглядит более современно
+            TopAppBar( 
                 title = { 
                     Text(
-                        "Reshala", 
-                        style = MaterialTheme.typography.headlineSmall,
+                        text = buildAnnotatedString {
+                            append("Re∫λala")
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 12.sp,
+                                    letterSpacing = 1.sp,
+                                    baselineShift = BaselineShift.Superscript,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                append("alfa")
+                            }
+                        },
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary
                     ) 
@@ -65,7 +84,7 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(ReshalaDarkBlue), // Цвет из логотипа
+                                    .background(ReshalaDarkBlue),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -107,14 +126,25 @@ fun HomeScreen(
             )
         }
     ) { padding ->
+        val pullState = rememberPullToRefreshState()
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
+            state = pullState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            indicator = {
+                PullToRefreshDefaults.Indicator(
+                    state = pullState,
+                    isRefreshing = isRefreshing,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+            }
         ) {
-            if (history.isEmpty()) {
+            if (history.isEmpty() && !isRefreshing) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("No history yet", color = Color.Gray)
                 }
@@ -124,30 +154,30 @@ fun HomeScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                val recentHistory = history.take(3)
-                val groupedRecent = recentHistory.groupBy { formatToDate(it.createdAt) }
+                    val recentHistory = history.take(3)
+                    val groupedRecent = recentHistory.groupBy { formatToDate(it.createdAt) }
 
-                groupedRecent.forEach { (date, itemsList) ->
-                    item {
-                        Text(
-                            text = date,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                        )
-                    }
-                    items(itemsList) { item ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(MaterialTheme.shapes.large)
-                                .clickable { onTaskClick(item.id) }
-                        ) {
-                            HistoryItemCard(item)
+                    groupedRecent.forEach { (date, itemsList) ->
+                        item {
+                            Text(
+                                text = date,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                            )
+                        }
+                        items(itemsList) { item ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(MaterialTheme.shapes.large)
+                                    .clickable { onTaskClick(item.id) }
+                            ) {
+                                HistoryItemCard(item)
+                            }
                         }
                     }
-                }
                     
                     if (history.size > 3) {
                         item {
@@ -181,18 +211,10 @@ fun HomeScreenPreview() {
     val mockHistory = listOf(
         RecognitionEntity(
             id = "1",
-            originalResult = "x^2 + 6 - \\frac{4}{x^2} = 0",
+            originalResult = "x^2 + 5x + 6 = 0",
             status = "SOLUTION_READY",
-            createdAt = "2024-04-29T02:05:00",
+            createdAt = "2024-05-25T14:00:00",
             editedResult = null,
-            solutionResult = null
-        ),
-        RecognitionEntity(
-            id = "2",
-            originalResult = "x^2 + 6 - \\frac{4}{x^2} = 0",
-            status = "READY_FOR_FEEDBACK",
-            createdAt = "2024-04-29T02:01:00",
-            editedResult = "x^2 + 6 - 4/x^2 = 0",
             solutionResult = null
         )
     )

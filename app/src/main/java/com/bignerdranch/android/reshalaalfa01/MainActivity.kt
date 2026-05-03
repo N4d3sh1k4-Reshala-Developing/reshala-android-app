@@ -1,5 +1,6 @@
 package com.bignerdranch.android.reshalaalfa01
 
+import kotlin.getValue
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,10 +8,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -19,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bignerdranch.android.reshalaalfa01.data.AuthRepository
 import com.bignerdranch.android.reshalaalfa01.data.local.AppDatabase
@@ -37,9 +44,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.Authenticator
-import okhttp3.Cookie
-import okhttp3.CookieJar
-import okhttp3.HttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -50,7 +54,7 @@ import retrofit2.Retrofit
 
 class MainActivity : ComponentActivity() {
     private val json = Json { ignoreUnknownKeys = true }
-    
+    var baseURL = BuildConfig.BASE_URL
     private val cookieJar by lazy { PersistentCookieJar(applicationContext) }
 
     private val okHttpClient by lazy {
@@ -85,7 +89,7 @@ class MainActivity : ComponentActivity() {
 
     private val retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8180/api/v0/")
+            .baseUrl(baseURL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -95,6 +99,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var tokenManager: TokenManager
     private lateinit var repository: AuthRepository
     private lateinit var viewModel: AuthViewModel
+    private lateinit var recognitionViewModel: RecognitionViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -104,13 +109,14 @@ class MainActivity : ComponentActivity() {
         tokenManager = TokenManager(applicationContext)
         repository = AuthRepository(apiService, tokenManager, database.recognitionDao(), json)
         viewModel = AuthViewModel(repository)
+        recognitionViewModel = RecognitionViewModel(repository)
         
         handleIntent(intent)
         
         enableEdgeToEdge()
         setContent {
             ReshalaAlfa01Theme {
-                AuthNavigation(viewModel)
+                AuthNavigation(viewModel, recognitionViewModel)
             }
         }
     }
@@ -128,12 +134,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AuthNavigation(viewModel: AuthViewModel) {
+fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionViewModel) {
     val authState by viewModel.authState.collectAsState()
     val userData by viewModel.userData.collectAsState()
     val history by viewModel.history.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val resendTimer by viewModel.resendTimer.collectAsState()
+    
+    val recognitionState by recognitionViewModel.state.collectAsState()
     
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -163,34 +171,115 @@ fun AuthNavigation(viewModel: AuthViewModel) {
             }
             is AuthState.Authenticated -> {
                 val authNavController = rememberNavController()
-                NavHost(navController = authNavController, startDestination = "home") {
-                    composable("home") {
-                        HomeScreen(
-                            userData = userData,
-                            history = history,
-                            isRefreshing = isRefreshing,
-                            onRefresh = { viewModel.refreshHistory() },
-                            onLogout = { viewModel.logout() },
-                            onShowMoreClick = { authNavController.navigate("history") },
-                            onTaskClick = { taskId -> authNavController.navigate("task/$taskId") }
-                        )
+                val navBackStackEntry by authNavController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    NavHost(
+                        navController = authNavController, 
+                        startDestination = "home",
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        composable("home") {
+                            HomeScreen(
+                                userData = userData,
+                                history = history,
+                                isRefreshing = isRefreshing,
+                                onRefresh = { viewModel.refreshHistory() },
+                                onLogout = { viewModel.logout() },
+                                onShowMoreClick = { authNavController.navigate("history") },
+                                onTaskClick = { taskId -> authNavController.navigate("task/$taskId") }
+                            )
+                        }
+                        composable("history") {
+                            HistoryScreen(
+                                history = history,
+                                isRefreshing = isRefreshing,
+                                onRefresh = { viewModel.refreshHistory() },
+                                onTaskClick = { taskId -> authNavController.navigate("task/$taskId") },
+                                onBackClick = { authNavController.popBackStack() }
+                            )
+                        }
+                        composable("task/{taskId}") { backStackEntry ->
+                            val taskId = backStackEntry.arguments?.getString("taskId")
+                            val task = history.find { it.id == taskId }
+                            TaskDetailScreen(
+                                task = task,
+                                onBackClick = { authNavController.popBackStack() }
+                            )
+                        }
+                        composable("camera") {
+                            CameraScreen(
+                                onClose = { authNavController.popBackStack() },
+                                onCapture = { image, rect ->
+                                    recognitionViewModel.processCapturedImage(image, rect)
+                                    authNavController.popBackStack()
+                                }
+                            )
+                        }
                     }
-                    composable("history") {
-                        HistoryScreen(
-                            history = history,
-                            onTaskClick = { taskId -> authNavController.navigate("task/$taskId") },
-                            onBackClick = { authNavController.popBackStack() }
-                        )
-                    }
-                    composable("task/{taskId}") { backStackEntry ->
-                        val taskId = backStackEntry.arguments?.getString("taskId")
-                        val task = history.find { it.id == taskId }
-                        TaskDetailScreen(
-                            task = task,
-                            onBackClick = { authNavController.popBackStack() }
-                        )
+
+                    if (currentRoute != "camera") {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp), 
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(64.dp),
+                                shape = androidx.compose.foundation.shape.CircleShape,
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f),
+                                tonalElevation = 3.dp,
+                                shadowElevation = 8.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    IconButton(onClick = { authNavController.navigate("home") }) {
+                                        Icon(
+                                            Icons.Default.Home, 
+                                            contentDescription = "Home",
+                                            tint = if (currentRoute == "home") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    FloatingActionButton(
+                                        onClick = { authNavController.navigate("camera") },
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = Color.White,
+                                        shape = androidx.compose.foundation.shape.CircleShape,
+                                        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp),
+                                        modifier = Modifier.size(48.dp)
+                                    ) {
+                                        Icon(Icons.Default.PhotoCamera, contentDescription = "Camera", modifier = Modifier.size(24.dp))
+                                    }
+
+                                    IconButton(onClick = { authNavController.navigate("history") }) {
+                                        Icon(
+                                            Icons.Default.History, 
+                                            contentDescription = "History",
+                                            tint = if (currentRoute == "history" || currentRoute?.startsWith("task/") == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+                
+                RecognitionDialog(
+                    state = recognitionState,
+                    onDismiss = { recognitionViewModel.reset() },
+                    onAccept = { id -> recognitionViewModel.sendFeedback(id, accepted = true) },
+                    onEdit = { id, text -> recognitionViewModel.sendFeedback(id, accepted = false, editedResult = text) },
+                    onSuccessFinished = { recognitionViewModel.finishSuccess() }
+                )
             }
             else -> {
                 Box(modifier = Modifier.padding(padding)) {

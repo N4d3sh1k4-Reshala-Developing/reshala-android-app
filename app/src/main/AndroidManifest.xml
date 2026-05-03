@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
 
     <application
         android:networkSecurityConfig="@xml/network_security_config"
@@ -41,9 +43,9 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" />
-                <data android:host="10.0.2.2" />
-                <data android:port="8180" />
+                <data android:scheme="${SCHEME}" />
+                <data android:host="${HOST}"
+                    android:port="${PORT}"/>
                 <data android:pathPrefix="/api/v0/auth/confirm-email" />
             </intent-filter>
 
@@ -53,8 +55,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="http" />
-                <data android:host="10.0.2.2" />
-                <data android:port="8180" />
+                <data android:host="${HOST}"
+                    android:port="${PORT}"/>
                 <data android:pathPrefix="/reset-password" />
             </intent-filter>
         </activity>

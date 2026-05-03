@@ -6,6 +6,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -25,6 +26,23 @@ fun LatexText(
     backgroundColor: Color = if (isDisplayMode && showBackground) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
 ) {
     if (latex.isBlank()) return
+
+    // Если это сообщение об ошибке, просто отображаем его как обычный текст
+    if (latex.startsWith("Error:") || latex.startsWith("FAILED:")) {
+        androidx.compose.material3.Surface(
+            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+            shape = MaterialTheme.shapes.medium,
+            modifier = modifier.fillMaxWidth()
+        ) {
+            androidx.compose.material3.Text(
+                text = latex,
+                modifier = Modifier.padding(12.dp),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        return
+    }
 
     val textColorHex = String.format("#%06X", 0xFFFFFF and color.toArgb())
     
@@ -100,12 +118,13 @@ fun LatexText(
                                     trust: true 
                                 });
                             } catch (err) {
-                                el.style.color = '#888888';
+                                el.style.color = '#856404';
                                 el.style.textAlign = 'center';
-                                el.style.fontSize = '0.8em';
-                                el.style.padding = '8px';
-                                el.innerHTML = '<div style="margin-bottom: 4px;">⚠️ Invalid formula structure</div>' + 
-                                             '<code style="font-size: 0.7em; opacity: 0.7; word-break: break-all;">' + rawTex + '</code>';
+                                el.style.fontSize = '0.9em';
+                                el.style.padding = '12.dp';
+                                document.body.style.backgroundColor = 'rgba(255, 243, 205, 0.5)';
+                                el.innerHTML = '<div style="font-weight: bold;">⚠️ Invalid formula structure</div>' + 
+                                             '<div style="font-size: 0.8em; opacity: 0.8;">The recognized text cannot be rendered as math</div>';
                             }
                         } else {
                             el.innerHTML = rawTex;
@@ -142,6 +161,12 @@ fun LatexText(
                 webViewClient = WebViewClient()
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
+                
+                // Предотвращаем конфликты жестов
+                setOnTouchListener { v, _ ->
+                    v.parent.requestDisallowInterceptTouchEvent(false)
+                    false
+                }
             }
         },
         update = { webView ->
