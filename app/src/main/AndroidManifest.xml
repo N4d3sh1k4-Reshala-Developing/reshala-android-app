@@ -38,24 +38,27 @@
                 <data android:scheme="yx${YANDEX_CLIENT_ID}" />
             </intent-filter>
 
-            <!-- Deep Link Filter for Email Confirmation -->
-            <intent-filter>
+            <!-- Production App Links (Verified HTTPS) -->
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="${SCHEME}" />
-                <data android:host="${HOST}" android:port="${PORT}" />
-                <data android:pathPrefix="/api/v0/auth/confirm" />
+
+                <data android:scheme="https" android:host="${HOST}" />
+
+                <data android:pathPrefix="/api/v0/auth/confirm-email" />
+                <data android:pathPrefix="/api/v0/auth/reset-password" />
             </intent-filter>
 
-            <!-- Deep Link Filter for Reset Password -->
-            <intent-filter>
+            <!-- Local/Debug Deep Links (HTTP with port) -->
+            <intent-filter tools:ignore="AppLinkUrlError">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="${SCHEME}" />
-                <data android:host="${HOST}"
-                    android:port="${PORT}"/>
+
+                <data android:scheme="http" android:host="${HOST}" android:port="${PORT}" />
+
+                <data android:pathPrefix="/api/v0/auth/confirm-email" />
                 <data android:pathPrefix="/api/v0/auth/reset-password" />
             </intent-filter>
         </activity>
