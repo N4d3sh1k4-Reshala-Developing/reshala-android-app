@@ -215,8 +215,12 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                         composable("camera") {
                             CameraScreen(
                                 onClose = { authNavController.popBackStack() },
-                                onCapture = { image, rect ->
-                                    recognitionViewModel.processCapturedImage(image, rect)
+                                onCapture = { image, rect, uiWidth, uiHeight ->
+                                    recognitionViewModel.processCapturedImage(image, rect, uiWidth, uiHeight)
+                                    authNavController.popBackStack()
+                                },
+                                onGallerySelect = { bitmap, rect, uiWidth, uiHeight ->
+                                    recognitionViewModel.processBitmap(bitmap, rect, uiWidth, uiHeight)
                                     authNavController.popBackStack()
                                 }
                             )
@@ -329,6 +333,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                     if (resendTimer > 0) {
                                         Text(
                                             "Resend in ${resendTimer / 60}:${String.format("%02d", resendTimer % 60)}",
+                                            //"Resend in ${resendTimer / 60}:${String.format(Locale, resendTimer % 60)}",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )

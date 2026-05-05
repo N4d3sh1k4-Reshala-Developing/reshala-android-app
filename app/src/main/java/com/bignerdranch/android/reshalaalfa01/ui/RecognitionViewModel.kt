@@ -1,10 +1,8 @@
 package com.bignerdranch.android.reshalaalfa01.ui
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.net.Uri
 import androidx.camera.core.ImageProxy
 import androidx.compose.ui.geometry.Rect
 import androidx.lifecycle.ViewModel
@@ -23,7 +21,6 @@ import java.io.ByteArrayOutputStream
 
 sealed class RecognitionState {
     object Idle : RecognitionState()
-    object Capturing : RecognitionState()
     object Processing : RecognitionState()
     data class ReadyForFeedback(val taskData: RecognitionTaskData) : RecognitionState()
     data class Success(val taskData: RecognitionTaskData) : RecognitionState()
@@ -34,12 +31,13 @@ class RecognitionViewModel(private val repository: AuthRepository) : ViewModel()
     private val _state = MutableStateFlow<RecognitionState>(RecognitionState.Idle)
     val state: StateFlow<RecognitionState> = _state.asStateFlow()
 
-    fun processCapturedImage(imageProxy: ImageProxy, cropRect: Rect) {
+    fun processCapturedImage(imageProxy: ImageProxy, cropRect: Rect, uiWidth: Int, uiHeight: Int) {
         viewModelScope.launch {
             _state.value = RecognitionState.Processing
             
             val bitmap = imageProxyToBitmap(imageProxy)
-            val croppedBitmap = cropBitmap(bitmap, cropRect, imageProxy.width, imageProxy.height)
+            // Use UI dimensions (uiWidth, uiHeight) as the reference for cropRect
+            val croppedBitmap = cropBitmap(bitmap, cropRect, uiWidth, uiHeight)
             imageProxy.close()
             
             val stream = ByteArrayOutputStream()
@@ -49,6 +47,30 @@ class RecognitionViewModel(private val repository: AuthRepository) : ViewModel()
             val requestFile = byteArray.toRequestBody("image/jpeg".toMediaTypeOrNull())
             val body = MultipartBody.Part.createFormData("file", "equation.jpg", requestFile)
             
+            repository.processImage(body).onSuccess { response ->
+                if (response.success) {
+                    startPolling(response.data.id)
+                } else {
+                    _state.value = RecognitionState.Error("Upload failed")
+                }
+            }.onFailure {
+                _state.value = RecognitionState.Error(it.message ?: "Network error")
+            }
+        }
+    }
+
+    fun processBitmap(bitmap: Bitmap, cropRect: Rect, uiWidth: Int, uiHeight: Int) {
+        viewModelScope.launch {
+            _state.value = RecognitionState.Processing
+            val croppedBitmap = cropBitmap(bitmap, cropRect, uiWidth, uiHeight)
+
+            val stream = ByteArrayOutputStream()
+            croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+            val byteArray = stream.toByteArray()
+
+            val requestFile = byteArray.toRequestBody("image/jpeg".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("file", "equation.jpg", requestFile)
+
             repository.processImage(body).onSuccess { response ->
                 if (response.success) {
                     startPolling(response.data.id)

@@ -1,8 +1,9 @@
 package com.bignerdranch.android.reshalaalfa01.ui
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,14 +11,14 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Camera
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,8 +28,10 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -41,13 +44,30 @@ import kotlin.math.roundToInt
 @Composable
 fun CameraScreen(
     onClose: () -> Unit,
-    onCapture: (ImageProxy, Rect) -> Unit
+    onCapture: (ImageProxy, Rect, Int, Int) -> Unit,
+    onGallerySelect: (Bitmap, Rect, Int, Int) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val imageCapture = remember { ImageCapture.Builder().build() }
+
+    var pickedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            try {
+                context.contentResolver.openInputStream(it)?.use { stream ->
+                    pickedBitmap = BitmapFactory.decodeStream(stream)
+                }
+            } catch (e: Exception) {
+                Log.e("CameraScreen", "Failed to load image", e)
+            }
+        }
+    }
     
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -93,15 +113,40 @@ fun CameraScreen(
     }
     
     Box(modifier = Modifier.fillMaxSize()) {
-        if (hasCameraPermission) {
+        val bitmap = pickedBitmap
+        if (bitmap != null) {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val boxWidth = this.constraints.maxWidth
+                val boxHeight = this.constraints.maxHeight
+                
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+                
+                ResizableSelectionFrame(
+                    onCaptureClick = { rect ->
+                        onGallerySelect(bitmap, rect, boxWidth, boxHeight)
+                    },
+                    onClose = { pickedBitmap = null },
+                    isGalleryMode = true
+                )
+            }
+        } else if (hasCameraPermission) {
             AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
             ResizableSelectionFrame(
                 onCaptureClick = { rect ->
+                    // Capture the current size of the PreviewView
+                    val viewWidth = previewView.width
+                    val viewHeight = previewView.height
+                    
                     imageCapture.takePicture(
                         ContextCompat.getMainExecutor(context),
                         object : ImageCapture.OnImageCapturedCallback() {
                             override fun onCaptureSuccess(image: ImageProxy) {
-                                onCapture(image, rect)
+                                onCapture(image, rect, viewWidth, viewHeight)
                             }
                             override fun onError(exception: ImageCaptureException) {
                                 Log.e("CameraScreen", "Capture failed", exception)
@@ -109,7 +154,8 @@ fun CameraScreen(
                         }
                     )
                 },
-                onClose = onClose
+                onClose = onClose,
+                onGalleryClick = { galleryLauncher.launch("image/*") }
             )
         } else {
             Column(
@@ -129,15 +175,17 @@ fun CameraScreen(
 @Composable
 fun ResizableSelectionFrame(
     onCaptureClick: (Rect) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onGalleryClick: (() -> Unit)? = null,
+    isGalleryMode: Boolean = false
 ) {
     val density = LocalDensity.current
     var frameOffset by remember { mutableStateOf(Offset(100f, 500f)) }
     var frameSize by remember { mutableStateOf(Size(600f, 400f)) }
     
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val maxWidth = constraints.maxWidth.toFloat()
-        val maxHeight = constraints.maxHeight.toFloat()
+        val maxWidthPx = this.constraints.maxWidth.toFloat()
+        val maxHeightPx = this.constraints.maxHeight.toFloat()
         
         // Dimmed background with a hole
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -167,8 +215,8 @@ fun ResizableSelectionFrame(
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
-                        val newX = (frameOffset.x + dragAmount.x).coerceIn(0f, maxWidth - frameSize.width)
-                        val newY = (frameOffset.y + dragAmount.y).coerceIn(0f, maxHeight - frameSize.height)
+                        val newX = (frameOffset.x + dragAmount.x).coerceIn(0f, maxWidthPx - frameSize.width)
+                        val newY = (frameOffset.y + dragAmount.y).coerceIn(0f, maxHeightPx - frameSize.height)
                         frameOffset = Offset(newX, newY)
                     }
                 }
@@ -189,8 +237,8 @@ fun ResizableSelectionFrame(
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
-                        val newWidth = (frameSize.width + dragAmount.x).coerceIn(100f, maxWidth - frameOffset.x)
-                        val newHeight = (frameSize.height + dragAmount.y).coerceIn(100f, maxHeight - frameOffset.y)
+                        val newWidth = (frameSize.width + dragAmount.x).coerceIn(100f, maxWidthPx - frameOffset.x)
+                        val newHeight = (frameSize.height + dragAmount.y).coerceIn(100f, maxHeightPx - frameOffset.y)
                         frameSize = Size(newWidth, newHeight)
                     }
                 }
@@ -220,11 +268,19 @@ fun ResizableSelectionFrame(
                 contentColor = Color.White,
                 shape = CircleShape
             ) {
-                Icon(Icons.Default.Camera, contentDescription = "Capture")
+                Icon(if (isGalleryMode) Icons.Default.Check else Icons.Default.Camera, contentDescription = if (isGalleryMode) "Confirm" else "Capture")
             }
             
-            // Empty spacer for symmetry if needed
-            Spacer(modifier = Modifier.size(48.dp))
+            if (onGalleryClick != null) {
+                IconButton(
+                    onClick = onGalleryClick,
+                    modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(Icons.Default.PhotoLibrary, contentDescription = "Gallery", tint = Color.White)
+                }
+            } else {
+                Spacer(modifier = Modifier.size(48.dp))
+            }
         }
     }
 }
