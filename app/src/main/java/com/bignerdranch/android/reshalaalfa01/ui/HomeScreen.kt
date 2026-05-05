@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -37,7 +39,8 @@ fun HomeScreen(
     onRefresh: () -> Unit,
     onLogout: () -> Unit,
     onShowMoreClick: () -> Unit,
-    onTaskClick: (String) -> Unit
+    onTaskClick: (String) -> Unit,
+    onFeedbackClick: (RecognitionEntity) -> Unit
 ) {
     var showProfileMenu by remember { mutableStateOf(false) }
 
@@ -145,7 +148,12 @@ fun HomeScreen(
             }
         ) {
             if (history.isEmpty() && !isRefreshing) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text("No history yet", color = Color.Gray)
                 }
             } else {
@@ -172,9 +180,18 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(MaterialTheme.shapes.large)
-                                    .clickable { onTaskClick(item.id) }
+                                    .clickable { 
+                                        if (item.status != "READY_FOR_FEEDBACK") {
+                                            onTaskClick(item.id)
+                                        }
+                                    }
                             ) {
-                                HistoryItemCard(item)
+                                HistoryItemCard(
+                                    item = item,
+                                    onActionClick = if (item.status == "READY_FOR_FEEDBACK") {
+                                        { onFeedbackClick(item) }
+                                    } else null
+                                )
                             }
                         }
                     }
@@ -227,7 +244,8 @@ fun HomeScreenPreview() {
             onRefresh = {},
             onLogout = {},
             onShowMoreClick = {},
-            onTaskClick = {}
+            onTaskClick = {},
+            onFeedbackClick = {}
         )
     }
 }

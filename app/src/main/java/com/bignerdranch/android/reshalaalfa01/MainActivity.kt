@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -188,7 +189,8 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 onRefresh = { viewModel.refreshHistory() },
                                 onLogout = { viewModel.logout() },
                                 onShowMoreClick = { authNavController.navigate("history") },
-                                onTaskClick = { taskId -> authNavController.navigate("task/$taskId") }
+                                onTaskClick = { taskId -> authNavController.navigate("task/$taskId") },
+                                onFeedbackClick = { task -> recognitionViewModel.startFeedback(task) }
                             )
                         }
                         composable("history") {
@@ -197,6 +199,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 isRefreshing = isRefreshing,
                                 onRefresh = { viewModel.refreshHistory() },
                                 onTaskClick = { taskId -> authNavController.navigate("task/$taskId") },
+                                onFeedbackClick = { task -> recognitionViewModel.startFeedback(task) },
                                 onBackClick = { authNavController.popBackStack() }
                             )
                         }
@@ -205,6 +208,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                             val task = history.find { it.id == taskId }
                             TaskDetailScreen(
                                 task = task,
+                                onFeedbackClick = { taskEntity -> recognitionViewModel.startFeedback(taskEntity) },
                                 onBackClick = { authNavController.popBackStack() }
                             )
                         }
@@ -224,7 +228,8 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
-                                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp), 
+                                .navigationBarsPadding() // Автоматический отступ от системной панели навигации
+                                .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Surface(
@@ -299,6 +304,48 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 onBackClick = { viewModel.resetToLogin() }
                             )
                         }
+                        is AuthState.AwaitingPasswordReset -> {
+                            val email = state.email
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.padding(24.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Email,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(64.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Text("Check your email", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        "We've sent a password reset link to $email. Please follow the link in the email to set a new password.",
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Spacer(modifier = Modifier.height(32.dp))
+                                    if (resendTimer > 0) {
+                                        Text(
+                                            "Resend in ${resendTimer / 60}:${String.format("%02d", resendTimer % 60)}",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    } else {
+                                        Button(
+                                            onClick = { viewModel.forgotPassword(email) },
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("Resend Link")
+                                        }
+                                    }
+                                    TextButton(onClick = { viewModel.resetToLogin() }) {
+                                        Text("Back to Login")
+                                    }
+                                }
+                            }
+                        }
                         is AuthState.AwaitingVerification -> {
                             val email = state.email
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -306,20 +353,38 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier.padding(24.dp)
                                 ) {
-                                    Text("Check your email", style = MaterialTheme.typography.headlineSmall)
+                                    Icon(
+                                        Icons.Default.Email,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(64.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Text("Verify your email", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        "We've sent a link to $email",
+                                        "We've sent a verification link to $email. Please click the link to activate your account.",
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Spacer(modifier = Modifier.height(32.dp))
                                     if (resendTimer > 0) {
-                                        Text("Resend in ${resendTimer / 60}:${String.format("%02d", resendTimer % 60)}")
+                                        Text(
+                                            "Resend in ${resendTimer / 60}:${String.format("%02d", resendTimer % 60)}",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     } else {
-                                        Button(onClick = { viewModel.resendConfirmation() }) { Text("Resend") }
+                                        Button(
+                                            onClick = { viewModel.resendConfirmation() },
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text("Resend Link")
+                                        }
                                     }
-                                    TextButton(onClick = { viewModel.resetToLogin() }) { Text("Back to Login") }
+                                    TextButton(onClick = { viewModel.resetToLogin() }) {
+                                        Text("Back to Login")
+                                    }
                                 }
                             }
                         }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,7 +21,10 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun HistoryItemCard(item: RecognitionEntity) {
+fun HistoryItemCard(
+    item: RecognitionEntity,
+    onActionClick: (() -> Unit)? = null
+) {
     val isDark = isSystemInDarkTheme()
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -28,7 +32,7 @@ fun HistoryItemCard(item: RecognitionEntity) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp), // Убираем стандартную тень для "плоского" вида
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp), // Убираем стандартную тень для \"плоского\" вида
         border = androidx.compose.foundation.BorderStroke(
             width = if (isDark) 1.dp else 0.5.dp,
             color = if (isDark) MaterialTheme.colorScheme.outline.copy(alpha = 0.2f) else MaterialTheme.colorScheme.outlineVariant
@@ -49,13 +53,15 @@ fun HistoryItemCard(item: RecognitionEntity) {
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     StatusBadge(item.status)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        imageVector = Icons.Filled.ChevronRight,
-                        contentDescription = "View details",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
+                    if (item.status != "READY_FOR_FEEDBACK") {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Filled.ChevronRight,
+                            contentDescription = "View details",
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    }
                 }
             }
             
@@ -87,6 +93,20 @@ fun HistoryItemCard(item: RecognitionEntity) {
                             modifier = Modifier.heightIn(min = 40.dp, max = 100.dp)
                         )
                     }
+                }
+            }
+
+            if (item.status == "READY_FOR_FEEDBACK" && onActionClick != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = onActionClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    contentPadding = PaddingValues(vertical = 8.dp)
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Complete Recognition")
                 }
             }
         }

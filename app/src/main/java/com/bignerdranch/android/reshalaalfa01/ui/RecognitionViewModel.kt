@@ -112,6 +112,18 @@ class RecognitionViewModel(private val repository: AuthRepository) : ViewModel()
         _state.value = RecognitionState.Idle
     }
 
+    fun startFeedback(task: com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity) {
+        _state.value = RecognitionState.ReadyForFeedback(
+            RecognitionTaskData(
+                id = task.id,
+                createdAt = task.createdAt,
+                status = task.status,
+                originalResult = task.originalResult,
+                editedResult = task.editedResult
+            )
+        )
+    }
+
     private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
         val buffer = image.planes[0].buffer
         val bytes = ByteArray(buffer.remaining())

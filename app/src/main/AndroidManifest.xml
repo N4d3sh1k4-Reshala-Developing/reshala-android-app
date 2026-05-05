@@ -44,9 +44,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="${SCHEME}" />
-                <data android:host="${HOST}"
-                    android:port="${PORT}"/>
-                <data android:pathPrefix="/api/v0/auth/confirm-email" />
+                <data android:host="${HOST}" android:port="${PORT}" />
+                <data android:pathPrefix="/api/v0/auth/confirm" />
             </intent-filter>
 
             <!-- Deep Link Filter for Reset Password -->
@@ -54,10 +53,10 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" />
+                <data android:scheme="${SCHEME}" />
                 <data android:host="${HOST}"
                     android:port="${PORT}"/>
-                <data android:pathPrefix="/reset-password" />
+                <data android:pathPrefix="/api/v0/auth/reset-password" />
             </intent-filter>
         </activity>
     </application>

@@ -21,6 +21,7 @@ sealed class AuthState {
     object Unauthenticated : AuthState()
     data class AwaitingVerification(val email: String) : AuthState()
     object ForgotPassword : AuthState()
+    data class AwaitingPasswordReset(val email: String) : AuthState()
     data class ResetPassword(val token: String) : AuthState()
     data class Error(val message: String) : AuthState()
 }
@@ -57,7 +58,8 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
                     refreshHistory()
                 } else if (_authState.value !is AuthState.AwaitingVerification && 
                            _authState.value !is AuthState.ForgotPassword &&
-                           _authState.value !is AuthState.ResetPassword) {
+                           _authState.value !is AuthState.ResetPassword &&
+                           _authState.value !is AuthState.AwaitingPasswordReset) {
                     _authState.value = AuthState.Unauthenticated
                     _userData.value = null
                 }
@@ -144,7 +146,8 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             _authState.value = AuthState.Loading
             val result = repository.forgotPassword(email)
             if (result.isSuccess) {
-                _authState.value = AuthState.Unauthenticated
+                _authState.value = AuthState.AwaitingPasswordReset(email)
+                startResendTimer()
             } else {
                 _authState.value = AuthState.Error("Forgot password failed")
             }
@@ -165,7 +168,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private fun startResendTimer() {
         timerJob?.cancel()
-        _resendTimer.value = 120
+        _resendTimer.value = 300
         timerJob = viewModelScope.launch {
             while (_resendTimer.value > 0) {
                 delay(1000)
