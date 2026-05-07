@@ -24,3 +24,8 @@ data class FeedbackRequest(
     val editStatus: String, // "true" or "false" based on your description
     val editedResult: String? = null
 )
+
+@Serializable
+data class ManualSolveRequest(
+    val equation: String
+)
