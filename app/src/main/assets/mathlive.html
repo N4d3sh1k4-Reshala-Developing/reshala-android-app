@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MathLive Editor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 8px;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        math-field {
+            width: 100%;
+            min-height: 100px;
+            font-size: 24px;
+            border: none;
+            background-color: transparent;
+            color: var(--text-color, black);
+            --caret-color: #2196F3;
+            --selection-background-color: rgba(33, 150, 243, 0.3);
+            outline: none;
+        }
+
+        /* Оптимизация для низкой высоты экрана (Landscape) */
+        @media (max-height: 450px) {
+            math-field {
+                font-size: 20px;
+                min-height: 60px;
+            }
+            :root {
+                --keycap-height: 36px; /* Уменьшаем кнопки клавиатуры */
+            }
+        }
+
+        math-field::part(menu-toggle) { display: none !important; }
+        math-field::part(virtual-keyboard-toggle) { display: none !important; }
+
+        :root {
+            --keycap-height: 48px;
+        }
+    </style>
+    <script src="mathlive.min.js"></script>
+</head>
+<body>
+    <math-field id="mf"></math-field>
+
+    <script>
+        // Настройка путей к шрифтам для локальной работы
+        window.MathfieldElement.fontsDirectory = "./fonts";
+        const mf = document.getElementById('mf');
+
+        function setTheme(isDark) {
+            document.body.style.setProperty('--text-color', isDark ? 'white' : 'black');
+        }
+
+        function setLatex(latex) {
+            if (!mf) return;
+            const cleanLatex = latex.replace(/\\\\/g, '\\');
+            mf.setValue(cleanLatex, {suppressChangeNotifications: true});
+        }
+
+        function getLatex() {
+            return mf ? mf.getValue() : "";
+        }
+
+        mf.addEventListener('input', (ev) => {
+            if (window.Android) {
+                window.Android.onContentChanged(mf.getValue());
+            }
+        });
+
+        document.body.addEventListener('click', () => mf.focus());
+
+        mf.smartFence = true;
+        mf.virtualKeyboardMode = "onfocus";
+        mf.setOptions({
+            virtualKeyboardToggleGlyph: "",
+            menuToggleGlyph: "",
+            smartFraction: true, // Включает создание вертикальной дроби при нажатии "/"
+            smartFence: true    // Умные скобки
+        });
+
+        window.addEventListener('load', () => {
+            if (window.Android) {
+                window.Android.onReady();
+            }
+        });
+    </script>
+</body>
+</html>

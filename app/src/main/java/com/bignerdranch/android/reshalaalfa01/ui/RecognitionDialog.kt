@@ -1,27 +1,37 @@
 package com.bignerdranch.android.reshalaalfa01.ui
 
+import android.view.View
+import android.webkit.JavascriptInterface
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.RecognitionTaskData
-import com.bignerdranch.android.reshalaalfa01.ui.components.MathKey
-import com.bignerdranch.android.reshalaalfa01.ui.components.MathKeyboard
 import com.bignerdranch.android.reshalaalfa01.ui.util.LatexText
 
 @Composable
@@ -34,9 +44,11 @@ fun RecognitionDialog(
 ) {
     if (state is RecognitionState.Idle) return
 
-    var isEditingMode by remember { mutableStateOf(false) }
+    var isEditingMode by rememberSaveable { mutableStateOf(false) }
     
-    // Сбрасываем режим редактирования при переходе в другие состояния
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    
     LaunchedEffect(state) {
         if (state is RecognitionState.Processing || state is RecognitionState.Success) {
             isEditingMode = false
@@ -48,15 +60,21 @@ fun RecognitionDialog(
         properties = DialogProperties(
             dismissOnBackPress = state is RecognitionState.Error || state is RecognitionState.Success,
             dismissOnClickOutside = false,
-            usePlatformDefaultWidth = !isEditingMode
+            usePlatformDefaultWidth = !isEditingMode && !isLandscape
         )
     ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(if (isEditingMode && isLandscape) 1f else 1f)
                 .padding(horizontal = if (isEditingMode) 0.dp else 16.dp)
-                .then(if (isEditingMode) Modifier.fillMaxHeight(0.95f) else Modifier),
-            shape = if (isEditingMode) RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp) else MaterialTheme.shapes.extraLarge,
+                .then(
+                    if (isEditingMode) {
+                        if (isLandscape) Modifier.fillMaxSize() else Modifier.fillMaxHeight(0.95f)
+                    } else Modifier
+                ),
+            shape = if (isEditingMode) {
+                if (isLandscape) RoundedCornerShape(0.dp) else RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+            } else MaterialTheme.shapes.extraLarge,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
@@ -68,7 +86,8 @@ fun RecognitionDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(if (isEditingMode) 0.dp else 24.dp),
+                        .padding(if (isEditingMode) 0.dp else 24.dp)
+                        .then(if (!isEditingMode && currentState is RecognitionState.Error) Modifier.verticalScroll(rememberScrollState()) else Modifier),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(if (isEditingMode) 0.dp else 20.dp)
                 ) {
@@ -134,7 +153,10 @@ fun FeedbackView(
     isEditingMode: Boolean,
     onEditingModeChange: (Boolean) -> Unit
 ) {
-    var editedLatex by remember { mutableStateOf(data.originalResult ?: "") }
+    var editedLatex by rememberSaveable { mutableStateOf(data.originalResult ?: "") }
+    
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
     if (!isEditingMode) {
         Column(
@@ -176,61 +198,71 @@ fun FeedbackView(
         }
     } else {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Header for Edit Mode
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = if (isLandscape) 8.dp else 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Edit Equation", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                IconButton(onClick = { onEditingModeChange(false) }) {
+                Text(
+                    "Visual Editor", 
+                    style = if (isLandscape) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge, 
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(onClick = { onEditingModeChange(false) }, modifier = Modifier.size(if (isLandscape) 32.dp else 48.dp)) {
                     Icon(Icons.Default.Close, contentDescription = "Close")
                 }
             }
 
-            // Visual Preview Area
+            // Visual Editor Area (MathLive)
             Box(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(1f) // Занимаем всё доступное пространство
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                    .padding(horizontal = if (isLandscape) 8.dp else 16.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                        shape = MaterialTheme.shapes.medium
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = MaterialTheme.shapes.medium
+                    )
             ) {
-                LatexText(
-                    latex = editedLatex.ifEmpty { " " }, 
-                    isDisplayMode = true, 
-                    showBackground = false,
-                    fontSize = 24
+                MathLiveEditor(
+                    latex = editedLatex,
+                    onLatexChanged = { editedLatex = it },
+                    modifier = Modifier.fillMaxSize()
                 )
             }
 
             // Controls
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalArrangement = Arrangement.End
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = if (isLandscape) 8.dp else 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                if (!isLandscape) {
+                    Text(
+                        "Tap to focus and edit", 
+                        style = MaterialTheme.typography.labelMedium, 
+                        color = Color.Gray
+                    )
+                }
                 Button(
                     onClick = { onEdit(data.id, editedLatex) },
-                    shape = MaterialTheme.shapes.medium
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = if (isLandscape) Modifier.height(40.dp) else Modifier
                 ) {
+                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
                     Text("Solve")
                 }
             }
-
-            // The Math Keyboard
-            MathKeyboard(
-                onKeyClick = { key ->
-                    when (key) {
-                        is MathKey.Symbol -> editedLatex += key.latex
-                        is MathKey.Structure -> editedLatex += key.template
-                        is MathKey.Clear -> editedLatex = ""
-                        is MathKey.Backspace -> if (editedLatex.isNotEmpty()) {
-                            editedLatex = editedLatex.dropLast(1)
-                        }
-                    }
-                }
-            )
         }
     }
 }
