@@ -1,13 +1,11 @@
 package com.bignerdranch.android.reshalaalfa01.ui
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import androidx.camera.core.ImageProxy
 import androidx.compose.ui.geometry.Rect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bignerdranch.android.reshalaalfa01.data.AuthRepository
+import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.RecognitionTaskData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,8 +18,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 
 sealed class RecognitionState {
-    object Idle : RecognitionState()
-    object Processing : RecognitionState()
+    data object Idle : RecognitionState()
+    data object Processing : RecognitionState()
     data class ReadyForFeedback(val taskData: RecognitionTaskData) : RecognitionState()
     data class Success(val taskData: RecognitionTaskData) : RecognitionState()
     data class Error(val message: String) : RecognitionState()
@@ -30,34 +28,6 @@ sealed class RecognitionState {
 class RecognitionViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _state = MutableStateFlow<RecognitionState>(RecognitionState.Idle)
     val state: StateFlow<RecognitionState> = _state.asStateFlow()
-
-    fun processCapturedImage(imageProxy: ImageProxy, cropRect: Rect, uiWidth: Int, uiHeight: Int) {
-        viewModelScope.launch {
-            _state.value = RecognitionState.Processing
-            
-            val bitmap = imageProxyToBitmap(imageProxy)
-            // Use UI dimensions (uiWidth, uiHeight) as the reference for cropRect
-            val croppedBitmap = cropBitmap(bitmap, cropRect, uiWidth, uiHeight)
-            imageProxy.close()
-            
-            val stream = ByteArrayOutputStream()
-            croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
-            val byteArray = stream.toByteArray()
-            
-            val requestFile = byteArray.toRequestBody("image/jpeg".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file", "equation.jpg", requestFile)
-            
-            repository.processImage(body).onSuccess { response ->
-                if (response.success) {
-                    startPolling(response.data.id)
-                } else {
-                    _state.value = RecognitionState.Error("Upload failed")
-                }
-            }.onFailure {
-                _state.value = RecognitionState.Error(it.message ?: "Network error")
-            }
-        }
-    }
 
     fun processBitmap(bitmap: Bitmap, cropRect: Rect, uiWidth: Int, uiHeight: Int) {
         viewModelScope.launch {
@@ -76,6 +46,21 @@ class RecognitionViewModel(private val repository: AuthRepository) : ViewModel()
                     startPolling(response.data.id)
                 } else {
                     _state.value = RecognitionState.Error("Upload failed")
+                }
+            }.onFailure {
+                _state.value = RecognitionState.Error(it.message ?: "Network error")
+            }
+        }
+    }
+
+    fun solveManual(equation: String) {
+        viewModelScope.launch {
+            _state.value = RecognitionState.Processing
+            repository.solveManual(equation).onSuccess { response ->
+                if (response.success) {
+                    startPolling(response.data.id)
+                } else {
+                    _state.value = RecognitionState.Error("Solve request failed")
                 }
             }.onFailure {
                 _state.value = RecognitionState.Error(it.message ?: "Network error")
@@ -134,38 +119,37 @@ class RecognitionViewModel(private val repository: AuthRepository) : ViewModel()
         _state.value = RecognitionState.Idle
     }
 
-    fun startFeedback(task: com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity) {
+    fun startFeedback(task: RecognitionEntity) {
         _state.value = RecognitionState.ReadyForFeedback(
             RecognitionTaskData(
                 id = task.id,
                 createdAt = task.createdAt,
                 status = task.status,
                 originalResult = task.originalResult,
-                editedResult = task.editedResult
+                editedResult = task.editedResult,
+                solutionResult = task.solutionResult
             )
         )
     }
 
-    private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
-        val buffer = image.planes[0].buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    private fun cropBitmap(bitmap: Bitmap, rect: Rect, uiWidth: Int, uiHeight: Int): Bitmap {
+        // Вычисляем масштаб ContentScale.Fit
+        val scale = minOf(uiWidth.toFloat() / bitmap.width, uiHeight.toFloat() / bitmap.height)
         
-        // Handle rotation if necessary (CameraX usually handles this in Preview but not always in capture)
-        val matrix = Matrix()
-        matrix.postRotate(image.imageInfo.rotationDegrees.toFloat())
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    }
+        // Вычисляем реальные размеры и отступы изображения на экране
+        val actualDisplayedWidth = bitmap.width * scale
+        val actualDisplayedHeight = bitmap.height * scale
+        val offsetX = (uiWidth - actualDisplayedWidth) / 2
+        val offsetY = (uiHeight - actualDisplayedHeight) / 2
 
-    private fun cropBitmap(bitmap: Bitmap, rect: Rect, previewWidth: Int, previewHeight: Int): Bitmap {
-        val scaleX = bitmap.width.toFloat() / previewWidth
-        val scaleY = bitmap.height.toFloat() / previewHeight
-        
-        val left = (rect.left * scaleX).toInt().coerceIn(0, bitmap.width - 1)
-        val top = (rect.top * scaleY).toInt().coerceIn(0, bitmap.height - 1)
-        val width = (rect.width * scaleX).toInt().coerceIn(1, bitmap.width - left)
-        val height = (rect.height * scaleY).toInt().coerceIn(1, bitmap.height - top)
+        // Переводим координаты рамки в систему координат исходного Bitmap
+        val left = ((rect.left - offsetX) / scale).toInt().coerceIn(0, bitmap.width - 1)
+        val top = ((rect.top - offsetY) / scale).toInt().coerceIn(0, bitmap.height - 1)
+        val right = ((rect.right - offsetX) / scale).toInt().coerceIn(left + 1, bitmap.width)
+        val bottom = ((rect.bottom - offsetY) / scale).toInt().coerceIn(top + 1, bitmap.height)
+
+        val width = right - left
+        val height = bottom - top
         
         return Bitmap.createBitmap(bitmap, left, top, width, height)
     }
