@@ -58,4 +58,16 @@ interface AuthApiService {
         @Path("task_id") taskId: String,
         @Body request: FeedbackRequest
     ): Response<Unit>
+
+    @DELETE("recognition/data/{task_id}")
+    suspend fun deleteRecognition(
+        @Header("Authorization") token: String,
+        @Path("task_id") taskId: String
+    ): Response<Unit>
+
+    @POST("recognition/process/solve")
+    suspend fun solveManual(
+        @Header("Authorization") token: String,
+        @Body request: ManualSolveRequest
+    ): Response<RecognitionResponse>
 }
