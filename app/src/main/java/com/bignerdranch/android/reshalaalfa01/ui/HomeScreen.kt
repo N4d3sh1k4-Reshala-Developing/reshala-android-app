@@ -40,9 +40,9 @@ fun HomeScreen(
     onLogout: () -> Unit,
     onShowMoreClick: () -> Unit,
     onTaskClick: (String) -> Unit,
-    onFeedbackClick: (RecognitionEntity) -> Unit
+    onFeedbackClick: (RecognitionEntity) -> Unit,
 ) {
-    var showProfileMenu by remember { mutableStateOf(false) }
+    var showProfileMenu by remember { mutableStateOf(value = false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -244,8 +244,7 @@ fun HomeScreenPreview() {
             onRefresh = {},
             onLogout = {},
             onShowMoreClick = {},
-            onTaskClick = {},
-            onFeedbackClick = {}
-        )
+            onTaskClick = {}
+        ) { _ -> }
     }
 }
