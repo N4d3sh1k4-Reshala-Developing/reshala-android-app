@@ -23,6 +23,7 @@ sealed class AuthState {
     object ForgotPassword : AuthState()
     data class AwaitingPasswordReset(val email: String) : AuthState()
     data class ResetPassword(val token: String) : AuthState()
+    object EmailVerified : AuthState()
     data class Error(val message: String) : AuthState()
 }
 
@@ -59,6 +60,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
                 } else if (_authState.value !is AuthState.AwaitingVerification && 
                            _authState.value !is AuthState.ForgotPassword &&
                            _authState.value !is AuthState.ResetPassword &&
+                           _authState.value !is AuthState.EmailVerified &&
                            _authState.value !is AuthState.AwaitingPasswordReset) {
                     _authState.value = AuthState.Unauthenticated
                     _userData.value = null
@@ -204,7 +206,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             _authState.value = AuthState.Loading
             val result = repository.confirmEmail(token)
             if (result.isSuccess) {
-                _authState.value = AuthState.Unauthenticated
+                _authState.value = AuthState.EmailVerified
             } else {
                 _authState.value = AuthState.Error("Verification failed")
             }

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Functions
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -437,6 +438,36 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                     }
                                     TextButton(onClick = { viewModel.resetToLogin() }) {
                                         Text("Back to Login")
+                                    }
+                                }
+                            }
+                        }
+                        is AuthState.EmailVerified -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.padding(24.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Verified,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(64.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Text("Email Verified!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        "Your email has been successfully verified. You can now log in to your account.",
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Spacer(modifier = Modifier.height(32.dp))
+                                    Button(
+                                        onClick = { viewModel.resetToLogin() },
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text("Go to Login")
                                     }
                                 }
                             }
