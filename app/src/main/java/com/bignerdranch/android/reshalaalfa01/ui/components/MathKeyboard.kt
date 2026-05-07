@@ -24,6 +24,8 @@ sealed class MathKey(val label: String, val latex: String) {
     class Structure(label: String, val template: String) : MathKey(label, template)
     object Backspace : MathKey("DEL", "")
     object Clear : MathKey("AC", "")
+    object Left : MathKey("←", "")
+    object Right : MathKey("→", "")
 }
 
 @Composable
@@ -37,10 +39,12 @@ fun MathKeyboard(
         MathKey.Symbol("4"), MathKey.Symbol("5"), MathKey.Symbol("6"), MathKey.Symbol("-"),
         MathKey.Symbol("7"), MathKey.Symbol("8"), MathKey.Symbol("9"), MathKey.Symbol("*"),
         MathKey.Symbol("0"), MathKey.Symbol("."), MathKey.Symbol("("), MathKey.Symbol(")"),
-        MathKey.Structure("a/b", "\\frac{ }{ }"),
-        MathKey.Structure("x²", "^{2}"),
-        MathKey.Structure("xⁿ", "^{ }"),
-        MathKey.Structure("√", "\\sqrt{ }"),
+        MathKey.Symbol("/"),
+        MathKey.Symbol("^2"),
+        MathKey.Symbol("^"),
+        MathKey.Symbol("√"),
+        MathKey.Left,
+        MathKey.Right,
         MathKey.Clear,
         MathKey.Backspace
     )
@@ -76,12 +80,14 @@ fun KeyButton(
         is MathKey.Clear -> MaterialTheme.colorScheme.errorContainer
         is MathKey.Backspace -> MaterialTheme.colorScheme.secondaryContainer
         is MathKey.Structure -> MaterialTheme.colorScheme.primaryContainer
+        is MathKey.Left, is MathKey.Right -> MaterialTheme.colorScheme.tertiaryContainer
         else -> MaterialTheme.colorScheme.surface
     }
     
     val contentColor = when (key) {
         is MathKey.Clear -> MaterialTheme.colorScheme.onErrorContainer
         is MathKey.Structure -> MaterialTheme.colorScheme.onPrimaryContainer
+        is MathKey.Left, is MathKey.Right -> MaterialTheme.colorScheme.onTertiaryContainer
         else -> MaterialTheme.colorScheme.onSurface
     }
 
