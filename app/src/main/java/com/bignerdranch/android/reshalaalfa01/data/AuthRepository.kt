@@ -252,4 +252,33 @@ class AuthRepository(
             Result.failure(e)
         }
     }
+
+    suspend fun deleteRecognition(taskId: String): Result<Unit> {
+        return try {
+            val token = accessToken.firstOrNull() ?: return Result.failure(Exception("No token"))
+            val response = apiService.deleteRecognition("Bearer $token", taskId)
+            if (response.isSuccessful || response.code() == 204) {
+                recognitionDao.deleteById(taskId)
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Delete failed: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun solveManual(equation: String): Result<RecognitionResponse> {
+        return try {
+            val token = accessToken.firstOrNull() ?: return Result.failure(Exception("No token"))
+            val response = apiService.solveManual("Bearer $token", ManualSolveRequest(equation))
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Manual solve failed: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
