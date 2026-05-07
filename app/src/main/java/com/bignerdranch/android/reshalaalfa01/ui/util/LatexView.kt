@@ -1,19 +1,19 @@
 package com.bignerdranch.android.reshalaalfa01.ui.util
 
-import android.view.View
-import android.view.ViewGroup
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.graphics.Color as AndroidColor
+import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import io.noties.markwon.Markwon
+import io.noties.markwon.ext.latex.JLatexMathPlugin
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
 
 @Composable
 fun LatexText(
@@ -23,157 +23,59 @@ fun LatexText(
     isDisplayMode: Boolean = false,
     showBackground: Boolean = true,
     color: Color = MaterialTheme.colorScheme.onSurface,
-    backgroundColor: Color = if (isDisplayMode && showBackground) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+    backgroundColor: Color = Color.Transparent
 ) {
     if (latex.isBlank()) return
 
-    // Если это сообщение об ошибке, просто отображаем его как обычный текст
-    if (latex.startsWith("Error:") || latex.startsWith("FAILED:")) {
-        androidx.compose.material3.Surface(
-            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
-            shape = MaterialTheme.shapes.medium,
-            modifier = modifier.fillMaxWidth()
-        ) {
-            androidx.compose.material3.Text(
-                text = latex,
-                modifier = Modifier.padding(12.dp),
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
-            )
+    val context = LocalContext.current
+    
+    val processedText = remember(latex, isDisplayMode) {
+        // 1. Предварительная очистка текста
+        var cleaned = latex
+            .replace("\\\\", "\\") // \\frac -> \frac
+            .replace("\\$", "$")   // \$ -> $
+
+        // 2. Markwon JLatexMathPlugin использует $$ для инлайна.
+        // Одиночный $ не поддерживается.
+        if (cleaned.contains("$")) {
+            // Заменяем $formula$ на $$formula$$, не трогая уже существующие $$
+            cleaned = cleaned.replace(Regex("(?<!\\$)\\$([^$]+)\\$(?!\\$)")) { match ->
+                "$$" + match.groupValues[1] + "$$"
+            }
+        } else if (!isDisplayMode) {
+            // Если это не чистая формула и нет знаков $, возвращаем как есть
+        } else {
+            // Чистая формула в блочном режиме
+            cleaned = "$$\n$cleaned\n$$"
         }
-        return
+        cleaned
     }
 
-    val textColorHex = String.format("#%06X", 0xFFFFFF and color.toArgb())
-    
-    // Используем rgba для корректной поддержки прозрачности
-    val backgroundColorArgb = backgroundColor.toArgb()
-    val r = (backgroundColorArgb shr 16) and 0xFF
-    val g = (backgroundColorArgb shr 8) and 0xFF
-    val b = backgroundColorArgb and 0xFF
-    val a = backgroundColor.alpha
-    val bgColorStyle = "rgba($r, $g, $b, $a)"
-
-    // Предварительная обработка: исправляем степени и экранируем слэши для JS
-    val processedLatex = latex
-        .replace("**", "^")
-        .replace("\\", "\\\\")
-        .replace("'", "\\'")
-        .replace("\n", " ")
-
-    val htmlData = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-            <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-            <style>
-                html, body { 
-                    margin: 0; 
-                    padding: 0; 
-                    background-color: transparent; 
-                    width: 100%;
-                }
-                body { 
-                    padding: ${if (isDisplayMode && showBackground) "12px" else "4px"} 8px; 
-                    background-color: $bgColorStyle;
-                    color: $textColorHex; 
-                    font-size: ${fontSize}px;
-                    border-radius: 8px;
-                    box-sizing: border-box;
-                    font-weight: 500;
-                }
-                #math { 
-                    width: 100%; 
-                    text-align: ${if (isDisplayMode) "center" else "left"};
-                    word-wrap: break-word;
-                    overflow-wrap: break-word;
-                }
-                .katex-display { 
-                    margin: 0; 
-                    overflow-x: auto;
-                    overflow-y: hidden;
-                }
-                ::-webkit-scrollbar { display: none; }
-                .katex { 
-                    white-space: normal; 
-                }
-            </style>
-        </head>
-        <body>
-            <div id="math"></div>
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    var el = document.getElementById("math");
-                    var rawTex = '$processedLatex';
-                    
-                    try {
-                        if (${isDisplayMode}) {
-                            try {
-                                katex.render(rawTex, el, { 
-                                    displayMode: true, 
-                                    throwOnError: true,
-                                    trust: true 
-                                });
-                            } catch (err) {
-                                el.style.color = '#856404';
-                                el.style.textAlign = 'center';
-                                el.style.fontSize = '0.9em';
-                                el.style.padding = '12.dp';
-                                document.body.style.backgroundColor = 'rgba(255, 243, 205, 0.5)';
-                                el.innerHTML = '<div style="font-weight: bold;">⚠️ Invalid formula structure</div>' + 
-                                             '<div style="font-size: 0.8em; opacity: 0.8;">The recognized text cannot be rendered as math</div>';
-                            }
-                        } else {
-                            el.innerHTML = rawTex;
-                            renderMathInElement(el, {
-                                delimiters: [
-                                    {left: "\\(", right: "\\)", display: false},
-                                    {left: "$$", right: "$$", display: true},
-                                    {left: "$", right: "$", display: false}
-                                ],
-                                throwOnError: false
-                            });
-                        }
-                    } catch (e) {
-                        el.textContent = rawTex;
-                    }
-                });
-            </script>
-        </body>
-        </html>
-    """.trimIndent()
+    val markwon = remember(fontSize, color) {
+        val densityFontSize = fontSize.toFloat() * context.resources.displayMetrics.density
+        Markwon.builder(context)
+            .usePlugin(MarkwonInlineParserPlugin.create())
+            .usePlugin(JLatexMathPlugin.create(densityFontSize) { builder ->
+                builder.inlinesEnabled(true)
+            })
+            .build()
+    }
 
     AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                // Отключаем аппаратное ускорение для стабильности в списках
-                setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-
-                settings.javaScriptEnabled = true
-                setBackgroundColor(0) 
-                webViewClient = WebViewClient()
-                isVerticalScrollBarEnabled = false
-                isHorizontalScrollBarEnabled = false
-                
-                // Предотвращаем конфликты жестов
-                setOnTouchListener { v, _ ->
-                    v.parent.requestDisallowInterceptTouchEvent(false)
-                    false
-                }
+        factory = { ctx ->
+            TextView(ctx).apply {
+                setTextColor(color.toArgb())
             }
         },
-        update = { webView ->
-            webView.loadDataWithBaseURL("https://localhost", htmlData, "text/html", "UTF-8", null)
+        update = { textView ->
+            textView.setTextColor(color.toArgb())
+            if (showBackground && backgroundColor != Color.Transparent) {
+                textView.setBackgroundColor(backgroundColor.toArgb())
+            } else {
+                textView.setBackgroundColor(AndroidColor.TRANSPARENT)
+            }
+            markwon.setMarkdown(textView, processedText)
         },
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = if (isDisplayMode && showBackground) 60.dp else 24.dp, max = 500.dp)
+        modifier = modifier.fillMaxWidth()
     )
 }
