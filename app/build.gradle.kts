@@ -75,6 +75,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.2")
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -101,6 +102,12 @@ dependencies {
     implementation(libs.androidx.camera.extensions)
 
     implementation(libs.authsdk)
+    
+    // Markwon for Markdown and LaTeX rendering
+    val markwonVersion = "4.6.2"
+    implementation("io.noties.markwon:core:$markwonVersion")
+    implementation("io.noties.markwon:ext-latex:$markwonVersion")
+    implementation("io.noties.markwon:inline-parser:$markwonVersion") // Required for inline LaTeX like $x$
     
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
