@@ -7,9 +7,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Functions
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -41,6 +45,7 @@ import com.yandex.authsdk.YandexAuthLoginOptions
 import com.yandex.authsdk.YandexAuthOptions
 import com.yandex.authsdk.YandexAuthResult
 import com.yandex.authsdk.YandexAuthSdk
+import java.util.Locale
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -99,18 +104,31 @@ class MainActivity : ComponentActivity() {
     private val apiService by lazy { retrofit.create(AuthApiService::class.java) }
     private lateinit var tokenManager: TokenManager
     private lateinit var repository: AuthRepository
-    private lateinit var viewModel: AuthViewModel
-    private lateinit var recognitionViewModel: RecognitionViewModel
+
+    private val viewModel: AuthViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return AuthViewModel(repository) as T
+            }
+        }
+    }
+
+    private val recognitionViewModel: RecognitionViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return RecognitionViewModel(repository) as T
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-        super.onCreate(savedInstanceState)
         
         val database = AppDatabase.getDatabase(applicationContext)
         tokenManager = TokenManager(applicationContext)
         repository = AuthRepository(apiService, tokenManager, database.recognitionDao(), json)
-        viewModel = AuthViewModel(repository)
-        recognitionViewModel = RecognitionViewModel(repository)
+
+        super.onCreate(savedInstanceState)
         
         handleIntent(intent)
         
@@ -209,25 +227,35 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                             TaskDetailScreen(
                                 task = task,
                                 onFeedbackClick = { taskEntity -> recognitionViewModel.startFeedback(taskEntity) },
+                                onDeleteClick = { id ->
+                                    viewModel.deleteRecognition(id) {
+                                        authNavController.popBackStack()
+                                    }
+                                },
                                 onBackClick = { authNavController.popBackStack() }
                             )
                         }
                         composable("camera") {
                             CameraScreen(
                                 onClose = { authNavController.popBackStack() },
-                                onCapture = { image, rect, uiWidth, uiHeight ->
-                                    recognitionViewModel.processCapturedImage(image, rect, uiWidth, uiHeight)
-                                    authNavController.popBackStack()
-                                },
-                                onGallerySelect = { bitmap, rect, uiWidth, uiHeight ->
+                                onResult = { bitmap, rect, uiWidth, uiHeight ->
                                     recognitionViewModel.processBitmap(bitmap, rect, uiWidth, uiHeight)
+                                    authNavController.popBackStack()
+                                }
+                            )
+                        }
+                        composable("manual") {
+                            ManualEntryScreen(
+                                onClose = { authNavController.popBackStack() },
+                                onSolve = { equation ->
+                                    recognitionViewModel.solveManual(equation)
                                     authNavController.popBackStack()
                                 }
                             )
                         }
                     }
 
-                    if (currentRoute != "camera") {
+                    if (currentRoute != "camera" && currentRoute != "manual") {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
@@ -258,15 +286,36 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                         )
                                     }
 
-                                    FloatingActionButton(
-                                        onClick = { authNavController.navigate("camera") },
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = Color.White,
+                                    // Grouped Solve Actions
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                                         shape = androidx.compose.foundation.shape.CircleShape,
-                                        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp),
-                                        modifier = Modifier.size(48.dp)
+                                        modifier = Modifier.height(52.dp)
                                     ) {
-                                        Icon(Icons.Default.PhotoCamera, contentDescription = "Camera", modifier = Modifier.size(24.dp))
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.padding(horizontal = 4.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            IconButton(onClick = { authNavController.navigate("manual") }) {
+                                                Icon(
+                                                    Icons.Default.Functions, 
+                                                    contentDescription = "Manual Entry",
+                                                    tint = if (currentRoute == "manual") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+
+                                            FloatingActionButton(
+                                                onClick = { authNavController.navigate("camera") },
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = Color.White,
+                                                shape = androidx.compose.foundation.shape.CircleShape,
+                                                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp),
+                                                modifier = Modifier.size(42.dp)
+                                            ) {
+                                                Icon(Icons.Default.PhotoCamera, contentDescription = "Camera", modifier = Modifier.size(20.dp))
+                                            }
+                                        }
                                     }
 
                                     IconButton(onClick = { authNavController.navigate("history") }) {
@@ -332,8 +381,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                     Spacer(modifier = Modifier.height(32.dp))
                                     if (resendTimer > 0) {
                                         Text(
-                                            "Resend in ${resendTimer / 60}:${String.format("%02d", resendTimer % 60)}",
-                                            //"Resend in ${resendTimer / 60}:${String.format(Locale, resendTimer % 60)}",
+                                            "Resend in ${resendTimer / 60}:${String.format(Locale.getDefault(), "%02d", resendTimer % 60)}",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -375,7 +423,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                     Spacer(modifier = Modifier.height(32.dp))
                                     if (resendTimer > 0) {
                                         Text(
-                                            "Resend in ${resendTimer / 60}:${String.format("%02d", resendTimer % 60)}",
+                                            "Resend in ${resendTimer / 60}:${String.format(Locale.getDefault(), "%02d", resendTimer % 60)}",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
