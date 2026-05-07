@@ -223,6 +223,14 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             _userData.value = null
         }
     }
+
+    fun deleteRecognition(taskId: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            repository.deleteRecognition(taskId).onSuccess {
+                onSuccess()
+            }
+        }
+    }
     
     fun resetToLogin() {
         _authState.value = AuthState.Unauthenticated
