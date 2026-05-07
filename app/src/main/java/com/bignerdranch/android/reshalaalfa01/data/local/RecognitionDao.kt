@@ -18,6 +18,9 @@ interface RecognitionDao {
     @Query("DELETE FROM recognition_history")
     suspend fun clearAll()
 
+    @Query("DELETE FROM recognition_history WHERE id = :id")
+    suspend fun deleteById(id: String)
+
     @Transaction
     suspend fun updateHistory(items: List<RecognitionEntity>) {
         clearAll()
