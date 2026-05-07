@@ -43,11 +43,17 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="https" android:host="${HOST}" />
-
+                <data android:scheme="https" />
+                <data android:host="${HOST}" />
                 <data android:pathPrefix="/api/v0/auth/confirm-email" />
                 <data android:pathPrefix="/api/v0/auth/reset-password" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="reshala" android:host="api" />
             </intent-filter>
 
             <!-- Local/Debug Deep Links (HTTP with port) -->
@@ -55,9 +61,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" android:host="${HOST}" android:port="${PORT}" />
-
+                <data android:scheme="http" />
+                <data android:host="${HOST}" android:port="${PORT}" />
                 <data android:pathPrefix="/api/v0/auth/confirm-email" />
                 <data android:pathPrefix="/api/v0/auth/reset-password" />
             </intent-filter>
