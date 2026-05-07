@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +22,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -30,11 +34,12 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -44,8 +49,7 @@ import kotlin.math.roundToInt
 @Composable
 fun CameraScreen(
     onClose: () -> Unit,
-    onCapture: (ImageProxy, Rect, Int, Int) -> Unit,
-    onGallerySelect: (Bitmap, Rect, Int, Int) -> Unit
+    onResult: (Bitmap, Rect, Int, Int) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -53,7 +57,8 @@ fun CameraScreen(
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val imageCapture = remember { ImageCapture.Builder().build() }
 
-    var pickedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var capturedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var isCapturing by remember { mutableStateOf(false) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -61,7 +66,7 @@ fun CameraScreen(
         uri?.let {
             try {
                 context.contentResolver.openInputStream(it)?.use { stream ->
-                    pickedBitmap = BitmapFactory.decodeStream(stream)
+                    capturedBitmap = BitmapFactory.decodeStream(stream)
                 }
             } catch (e: Exception) {
                 Log.e("CameraScreen", "Failed to load image", e)
@@ -113,7 +118,7 @@ fun CameraScreen(
     }
     
     Box(modifier = Modifier.fillMaxSize()) {
-        val bitmap = pickedBitmap
+        val bitmap = capturedBitmap
         if (bitmap != null) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val boxWidth = this.constraints.maxWidth
@@ -128,35 +133,69 @@ fun CameraScreen(
                 
                 ResizableSelectionFrame(
                     onCaptureClick = { rect ->
-                        onGallerySelect(bitmap, rect, boxWidth, boxHeight)
+                        onResult(bitmap, rect, boxWidth, boxHeight)
                     },
-                    onClose = { pickedBitmap = null },
+                    onClose = { capturedBitmap = null },
                     isGalleryMode = true
                 )
             }
         } else if (hasCameraPermission) {
             AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
-            ResizableSelectionFrame(
-                onCaptureClick = { rect ->
-                    // Capture the current size of the PreviewView
-                    val viewWidth = previewView.width
-                    val viewHeight = previewView.height
+            
+            // Simple overlay with Shutter button
+            Box(modifier = Modifier.fillMaxSize()) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 48.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onClose,
+                        modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                    }
                     
-                    imageCapture.takePicture(
-                        ContextCompat.getMainExecutor(context),
-                        object : ImageCapture.OnImageCapturedCallback() {
-                            override fun onCaptureSuccess(image: ImageProxy) {
-                                onCapture(image, rect, viewWidth, viewHeight)
-                            }
-                            override fun onError(exception: ImageCaptureException) {
-                                Log.e("CameraScreen", "Capture failed", exception)
-                            }
+                    if (isCapturing) {
+                        CircularProgressIndicator(color = Color.White)
+                    } else {
+                        FloatingActionButton(
+                            onClick = {
+                                isCapturing = true
+                                imageCapture.takePicture(
+                                    ContextCompat.getMainExecutor(context),
+                                    object : ImageCapture.OnImageCapturedCallback() {
+                                        override fun onCaptureSuccess(image: ImageProxy) {
+                                            capturedBitmap = imageProxyToBitmap(image)
+                                            image.close()
+                                            isCapturing = false
+                                        }
+                                        override fun onError(exception: ImageCaptureException) {
+                                            Log.e("CameraScreen", "Capture failed", exception)
+                                            isCapturing = false
+                                        }
+                                    }
+                                )
+                            },
+                            containerColor = Color.White,
+                            contentColor = Color.Black,
+                            shape = CircleShape
+                        ) {
+                            Icon(Icons.Default.PhotoCamera, contentDescription = "Capture")
                         }
-                    )
-                },
-                onClose = onClose,
-                onGalleryClick = { galleryLauncher.launch("image/*") }
-            )
+                    }
+
+                    IconButton(
+                        onClick = { galleryLauncher.launch("image/*") },
+                        modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    ) {
+                        Icon(Icons.Default.PhotoLibrary, contentDescription = "Gallery", tint = Color.White)
+                    }
+                }
+            }
         } else {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -172,6 +211,16 @@ fun CameraScreen(
     }
 }
 
+private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
+    val buffer = image.planes[0].buffer
+    val bytes = ByteArray(buffer.remaining())
+    buffer.get(bytes)
+    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    val matrix = Matrix()
+    matrix.postRotate(image.imageInfo.rotationDegrees.toFloat())
+    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+}
+
 @Composable
 fun ResizableSelectionFrame(
     onCaptureClick: (Rect) -> Unit,
@@ -180,15 +229,29 @@ fun ResizableSelectionFrame(
     isGalleryMode: Boolean = false
 ) {
     val density = LocalDensity.current
-    var frameOffset by remember { mutableStateOf(Offset(100f, 500f)) }
-    var frameSize by remember { mutableStateOf(Size(600f, 400f)) }
+
+    val offsetSaver = listSaver<Offset, Float>(
+        save = { listOf(it.x, it.y) },
+        restore = { Offset(it[0], it[1]) }
+    )
+    val sizeSaver = listSaver<Size, Float>(
+        save = { listOf(it.width, it.height) },
+        restore = { Size(it[0], it[1]) }
+    )
+
+    var frameOffset by rememberSaveable(stateSaver = offsetSaver) { mutableStateOf(Offset(100f, 500f)) }
+    var frameSize by rememberSaveable(stateSaver = sizeSaver) { mutableStateOf(Size(600f, 400f)) }
     
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val maxWidthPx = this.constraints.maxWidth.toFloat()
         val maxHeightPx = this.constraints.maxHeight.toFloat()
         
         // Dimmed background with a hole
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(alpha = 0.99f) // Required for BlendMode.Clear to work correctly
+        ) {
             drawRect(Color.Black.copy(alpha = 0.5f))
             drawRect(
                 color = Color.Transparent,
