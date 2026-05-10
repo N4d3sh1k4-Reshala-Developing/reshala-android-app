@@ -157,6 +157,7 @@ class MainActivity : ComponentActivity() {
 fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionViewModel) {
     val authState by viewModel.authState.collectAsState()
     val userData by viewModel.userData.collectAsState()
+    val userStatistic by viewModel.statistic.collectAsState()
     val history by viewModel.history.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val resendTimer by viewModel.resendTimer.collectAsState()
@@ -203,6 +204,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                         composable("home") {
                             HomeScreen(
                                 userData = userData,
+                                statistic = userStatistic,
                                 history = history,
                                 isRefreshing = isRefreshing,
                                 onRefresh = { viewModel.refreshHistory() },

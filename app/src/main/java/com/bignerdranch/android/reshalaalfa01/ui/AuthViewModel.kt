@@ -8,6 +8,7 @@ import com.bignerdranch.android.reshalaalfa01.data.remote.dto.LoginRequest
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.RegisterRequest
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.ResetPasswordRequest
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.UserData
+import com.bignerdranch.android.reshalaalfa01.data.remote.dto.UserStatisticData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +35,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _userData = MutableStateFlow<UserData?>(null)
     val userData: StateFlow<UserData?> = _userData.asStateFlow()
 
+    private val _statistic = MutableStateFlow<UserStatisticData?>(null)
+    val statistic: StateFlow<UserStatisticData?> = _statistic.asStateFlow()
+
     private val _history = MutableStateFlow<List<RecognitionEntity>>(emptyList())
     val history: StateFlow<List<RecognitionEntity>> = _history.asStateFlow()
 
@@ -55,6 +59,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
                 if (token != null) {
                     _authState.value = AuthState.Authenticated
                     fetchUserData()
+                    fetchUserStatistic()
                     observeHistory()
                     refreshHistory()
                 } else if (_authState.value !is AuthState.AwaitingVerification && 
@@ -79,6 +84,14 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
+    private fun fetchUserStatistic() {
+        viewModelScope.launch {
+            repository.getUserStatistic().onSuccess {
+                _statistic.value = it
+            }
+        }
+    }
+
     private fun observeHistory() {
         viewModelScope.launch {
             repository.getHistoryFromDb().collect {
@@ -91,6 +104,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _isRefreshing.value = true
             repository.fetchAndSaveHistory()
+            repository.getUserStatistic().onSuccess { _statistic.value = it }
             // Даем KaTeX немного времени на отрисовку в WebView
             delay(1000)
             _isRefreshing.value = false

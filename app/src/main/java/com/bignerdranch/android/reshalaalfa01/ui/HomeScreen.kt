@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.UserData
+import com.bignerdranch.android.reshalaalfa01.data.remote.dto.UserStatisticData
 import com.bignerdranch.android.reshalaalfa01.ui.theme.ReshalaAlfa01Theme
 import com.bignerdranch.android.reshalaalfa01.ui.theme.ReshalaDarkBlue
 
@@ -34,6 +35,7 @@ import com.bignerdranch.android.reshalaalfa01.ui.theme.ReshalaDarkBlue
 @Composable
 fun HomeScreen(
     userData: UserData?,
+    statistic: UserStatisticData?,
     history: List<RecognitionEntity>,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
@@ -147,7 +149,7 @@ fun HomeScreen(
                 )
             }
         ) {
-            if (history.isEmpty() && !isRefreshing) {
+            if (history.isEmpty() && !isRefreshing && statistic == null) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -162,6 +164,41 @@ fun HomeScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    if (statistic != null) {
+                        item {
+                            Text(
+                                text = "Your Statistics",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = MaterialTheme.shapes.large,
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f))
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    StatItem("Total", statistic.totalTasks.toString())
+                                    StatItem("Solved", statistic.successTasks.toString())
+                                    StatItem("Edited", statistic.editedTasks.toString())
+                                    StatItem("Direct", statistic.directSolutionTasks.toString())
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        Text(
+                            text = "Recent History",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                        )
+                    }
+
                     val recentHistory = history.take(3)
                     val groupedRecent = recentHistory.groupBy { formatToDate(it.createdAt) }
 
@@ -218,6 +255,14 @@ fun HomeScreen(
     }
 }
 
+@Composable
+fun StatItem(label: String, value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+    }
+}
+
 @Preview(showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {
@@ -239,12 +284,14 @@ fun HomeScreenPreview() {
     ReshalaAlfa01Theme {
         HomeScreen(
             userData = mockUserData,
+            statistic = null,
             history = mockHistory,
             isRefreshing = false,
             onRefresh = {},
             onLogout = {},
             onShowMoreClick = {},
-            onTaskClick = {}
-        ) { _ -> }
+            onTaskClick = {},
+            onFeedbackClick = { _ -> }
+        )
     }
 }
