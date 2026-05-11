@@ -33,6 +33,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.res.stringResource
+import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.data.AuthRepository
 import com.bignerdranch.android.reshalaalfa01.data.local.AppDatabase
 import com.bignerdranch.android.reshalaalfa01.data.local.TokenManager
@@ -284,7 +286,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                     IconButton(onClick = { authNavController.navigate("home") }) {
                                         Icon(
                                             Icons.Default.Home, 
-                                            contentDescription = "Home",
+                                            contentDescription = stringResource(R.string.nav_home),
                                             tint = if (currentRoute == "home") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
@@ -303,7 +305,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                             IconButton(onClick = { authNavController.navigate("manual") }) {
                                                 Icon(
                                                     Icons.Default.Functions, 
-                                                    contentDescription = "Manual Entry",
+                                                    contentDescription = stringResource(R.string.nav_manual),
                                                     tint = if (currentRoute == "manual") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
@@ -316,7 +318,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp),
                                                 modifier = Modifier.size(42.dp)
                                             ) {
-                                                Icon(Icons.Default.PhotoCamera, contentDescription = "Camera", modifier = Modifier.size(20.dp))
+                                                Icon(Icons.Default.PhotoCamera, contentDescription = stringResource(R.string.nav_camera), modifier = Modifier.size(20.dp))
                                             }
                                         }
                                     }
@@ -324,7 +326,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                     IconButton(onClick = { authNavController.navigate("history") }) {
                                         Icon(
                                             Icons.Default.History, 
-                                            contentDescription = "History",
+                                            contentDescription = stringResource(R.string.nav_history),
                                             tint = if (currentRoute == "history" || currentRoute?.startsWith("task/") == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
@@ -374,17 +376,17 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(24.dp))
-                                    Text("Check your email", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.check_your_email), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        "We've sent a password reset link to $email. Please follow the link in the email to set a new password.",
+                                        stringResource(R.string.password_reset_sent_msg, email),
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Spacer(modifier = Modifier.height(32.dp))
                                     if (resendTimer > 0) {
                                         Text(
-                                            "Resend in ${resendTimer / 60}:${String.format(Locale.getDefault(), "%02d", resendTimer % 60)}",
+                                            stringResource(R.string.resend_in, "${resendTimer / 60}:${String.format(Locale.getDefault(), "%02d", resendTimer % 60)}"),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -393,11 +395,11 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                             onClick = { viewModel.forgotPassword(email) },
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
-                                            Text("Resend Link")
+                                            Text(stringResource(R.string.resend_link))
                                         }
                                     }
                                     TextButton(onClick = { viewModel.resetToLogin() }) {
-                                        Text("Back to Login")
+                                        Text(stringResource(R.string.back_to_login))
                                     }
                                 }
                             }
@@ -416,17 +418,17 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(24.dp))
-                                    Text("Verify your email", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.verify_email_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        "We've sent a verification link to $email. Please click the link to activate your account.",
+                                        stringResource(R.string.verify_email_msg, email),
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Spacer(modifier = Modifier.height(32.dp))
                                     if (resendTimer > 0) {
                                         Text(
-                                            "Resend in ${resendTimer / 60}:${String.format(Locale.getDefault(), "%02d", resendTimer % 60)}",
+                                            stringResource(R.string.resend_in, "${resendTimer / 60}:${String.format(Locale.getDefault(), "%02d", resendTimer % 60)}"),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -435,11 +437,11 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                             onClick = { viewModel.resendConfirmation() },
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
-                                            Text("Resend Link")
+                                            Text(stringResource(R.string.resend_link))
                                         }
                                     }
                                     TextButton(onClick = { viewModel.resetToLogin() }) {
-                                        Text("Back to Login")
+                                        Text(stringResource(R.string.back_to_login))
                                     }
                                 }
                             }
@@ -457,10 +459,10 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(24.dp))
-                                    Text("Email Verified!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.email_verified_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        "Your email has been successfully verified. You can now log in to your account.",
+                                        stringResource(R.string.email_verified_msg),
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
@@ -469,7 +471,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                         onClick = { viewModel.resetToLogin() },
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        Text("Go to Login")
+                                        Text(stringResource(R.string.go_to_login))
                                     }
                                 }
                             }
@@ -525,7 +527,7 @@ fun ForgotPasswordScreen(isLoading: Boolean, onSendClick: (String) -> Unit, onBa
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Forgot Password", 
+            stringResource(R.string.forgot_password), 
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
@@ -535,7 +537,7 @@ fun ForgotPasswordScreen(isLoading: Boolean, onSendClick: (String) -> Unit, onBa
         OutlinedTextField(
             value = email, 
             onValueChange = { email = it }, 
-            label = { Text("Email") }, 
+            label = { Text(stringResource(R.string.email)) }, 
             modifier = Modifier.fillMaxWidth(), 
             enabled = !isLoading,
             shape = MaterialTheme.shapes.medium,
@@ -543,7 +545,7 @@ fun ForgotPasswordScreen(isLoading: Boolean, onSendClick: (String) -> Unit, onBa
             isError = email.isNotEmpty() && !isEmailValid,
             supportingText = {
                 if (email.isNotEmpty() && !isEmailValid) {
-                    Text("Invalid email format (max 50 chars)")
+                    Text(stringResource(R.string.email_invalid_format))
                 }
             }
         )
@@ -554,9 +556,9 @@ fun ForgotPasswordScreen(isLoading: Boolean, onSendClick: (String) -> Unit, onBa
             enabled = !isLoading && isEmailValid,
             shape = MaterialTheme.shapes.medium
         ) {
-            if (isLoading) CircularProgressIndicator(modifier = Modifier.size(24.dp)) else Text("Send Reset Link")
+            if (isLoading) CircularProgressIndicator(modifier = Modifier.size(24.dp)) else Text(stringResource(R.string.send_reset_link))
         }
-        TextButton(onClick = onBackClick, enabled = !isLoading) { Text("Back to Login") }
+        TextButton(onClick = onBackClick, enabled = !isLoading) { Text(stringResource(R.string.back_to_login)) }
     }
 }
 
@@ -578,7 +580,7 @@ fun ResetPasswordScreen(isLoading: Boolean, onResetClick: (String, String) -> Un
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Reset Password", 
+            stringResource(R.string.reset_password), 
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
@@ -588,7 +590,7 @@ fun ResetPasswordScreen(isLoading: Boolean, onResetClick: (String, String) -> Un
         OutlinedTextField(
             value = pass, 
             onValueChange = { pass = it }, 
-            label = { Text("New Password") }, 
+            label = { Text(stringResource(R.string.password)) }, 
             modifier = Modifier.fillMaxWidth(), 
             enabled = !isLoading,
             shape = MaterialTheme.shapes.medium,
@@ -596,13 +598,16 @@ fun ResetPasswordScreen(isLoading: Boolean, onResetClick: (String, String) -> Un
             visualTransformation = if (passVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 TextButton(onClick = { passVisible = !passVisible }) {
-                    Text(if (passVisible) "HIDE" else "SHOW", style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        if (passVisible) stringResource(R.string.hide) else stringResource(R.string.show), 
+                        style = MaterialTheme.typography.labelSmall
+                    )
                 }
             },
             isError = pass.isNotEmpty() && !isPasswordValid,
             supportingText = {
                 if (pass.isNotEmpty() && !isPasswordValid) {
-                    Text("8-50 chars, must include lower, upper, digit and special char")
+                    Text(stringResource(R.string.password_hint_register))
                 }
             }
         )
@@ -611,7 +616,7 @@ fun ResetPasswordScreen(isLoading: Boolean, onResetClick: (String, String) -> Un
         OutlinedTextField(
             value = confirm, 
             onValueChange = { confirm = it }, 
-            label = { Text("Confirm New Password") }, 
+            label = { Text(stringResource(R.string.confirm_password)) }, 
             modifier = Modifier.fillMaxWidth(), 
             enabled = !isLoading,
             shape = MaterialTheme.shapes.medium,
@@ -619,13 +624,16 @@ fun ResetPasswordScreen(isLoading: Boolean, onResetClick: (String, String) -> Un
             visualTransformation = if (confirmVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 TextButton(onClick = { confirmVisible = !confirmVisible }) {
-                    Text(if (confirmVisible) "HIDE" else "SHOW", style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        if (confirmVisible) stringResource(R.string.hide) else stringResource(R.string.show), 
+                        style = MaterialTheme.typography.labelSmall
+                    )
                 }
             },
             isError = confirm.isNotEmpty() && confirm != pass,
             supportingText = {
                 if (confirm.isNotEmpty() && confirm != pass) {
-                    Text("Passwords do not match")
+                    Text(stringResource(R.string.passwords_dont_match))
                 }
             }
         )
@@ -635,8 +643,8 @@ fun ResetPasswordScreen(isLoading: Boolean, onResetClick: (String, String) -> Un
             modifier = Modifier.fillMaxWidth(), 
             enabled = !isLoading && isPasswordValid && isConfirmValid
         ) {
-            if (isLoading) CircularProgressIndicator(modifier = Modifier.size(24.dp)) else Text("Reset Password")
+            if (isLoading) CircularProgressIndicator(modifier = Modifier.size(24.dp)) else Text(stringResource(R.string.reset_password))
         }
-        TextButton(onClick = onBackClick, enabled = !isLoading) { Text("Back to Login") }
+        TextButton(onClick = onBackClick, enabled = !isLoading) { Text(stringResource(R.string.back_to_login)) }
     }
 }

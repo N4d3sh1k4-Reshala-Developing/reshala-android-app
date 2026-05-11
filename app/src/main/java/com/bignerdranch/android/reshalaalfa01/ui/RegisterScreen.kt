@@ -9,6 +9,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.ui.util.Validator
 
 @Composable
@@ -37,7 +39,7 @@ fun RegisterScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "Register", 
+            stringResource(R.string.register), 
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
@@ -47,7 +49,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text(stringResource(R.string.email)) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading,
             isError = email.isNotEmpty() && !isEmailValid,
@@ -55,7 +57,7 @@ fun RegisterScreen(
             singleLine = true,
             supportingText = {
                 if (email.isNotEmpty() && !isEmailValid) {
-                    Text("Invalid email format (max 50 chars)")
+                    Text(stringResource(R.string.email_invalid_format))
                 }
             }
         )
@@ -64,7 +66,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text(stringResource(R.string.password)) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading,
             isError = password.isNotEmpty() && !isPasswordValid,
@@ -73,12 +75,15 @@ fun RegisterScreen(
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Text(if (passwordVisible) "HIDE" else "SHOW", style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        if (passwordVisible) stringResource(R.string.hide) else stringResource(R.string.show), 
+                        style = MaterialTheme.typography.labelSmall
+                    )
                 }
             },
             supportingText = {
                 if (password.isNotEmpty() && !isPasswordValid) {
-                    Text("8-50 chars, must include lower, upper, digit and special char")
+                    Text(stringResource(R.string.password_hint_register))
                 }
             }
         )
@@ -87,7 +92,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
+            label = { Text(stringResource(R.string.confirm_password)) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading,
             isError = confirmPassword.isNotEmpty() && confirmPassword != password,
@@ -96,12 +101,15 @@ fun RegisterScreen(
             visualTransformation = if (confirmVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 TextButton(onClick = { confirmVisible = !confirmVisible }) {
-                    Text(if (confirmVisible) "HIDE" else "SHOW", style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        if (confirmVisible) stringResource(R.string.hide) else stringResource(R.string.show), 
+                        style = MaterialTheme.typography.labelSmall
+                    )
                 }
             },
             supportingText = {
                 if (confirmPassword.isNotEmpty() && confirmPassword != password) {
-                    Text("Passwords do not match")
+                    Text(stringResource(R.string.passwords_dont_match))
                 }
             }
         )
@@ -118,14 +126,14 @@ fun RegisterScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Register")
+                Text(stringResource(R.string.register))
             }
         }
         TextButton(
             onClick = onNavigateToLogin,
             enabled = !isLoading
         ) {
-            Text("Already have an account? Login")
+            Text(stringResource(R.string.already_have_account))
         }
     }
 }

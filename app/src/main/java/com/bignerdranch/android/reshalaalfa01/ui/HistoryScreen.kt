@@ -25,6 +25,8 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,9 +44,11 @@ fun HistoryScreen(
         topBar = {
             TopAppBar( 
                 title = { 
+                    val historyTitle = stringResource(R.string.history_title)
+                    val alfa = stringResource(R.string.alfa)
                     Text(
                         text = buildAnnotatedString {
-                            append("History")
+                            append(historyTitle)
                             withStyle(
                                 style = SpanStyle(
                                     fontSize = 12.sp,
@@ -52,7 +56,7 @@ fun HistoryScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
-                                append("alfa")
+                                append(alfa)
                             }
                         },
                         style = MaterialTheme.typography.titleLarge,
@@ -62,7 +66,7 @@ fun HistoryScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 }
             )
@@ -97,7 +101,7 @@ fun HistoryScreen(
                         .verticalScroll(rememberScrollState()),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No history yet", color = Color.Gray)
+                    Text(stringResource(R.string.no_history), color = Color.Gray)
                 }
             } else {
                 LazyColumn(

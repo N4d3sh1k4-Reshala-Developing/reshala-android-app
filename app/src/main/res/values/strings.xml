@@ -1,3 +1,88 @@
 <resources>
     <string name="app_name">RE∫λALA</string>
+    <string name="alfa">alfa</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_history">History</string>
+    <string name="nav_camera">Camera</string>
+    <string name="nav_manual">Manual Entry</string>
+
+    <!-- Auth -->
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="back_to_login">Back to Login</string>
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="remember_me">Remember Me</string>
+    <string name="forgot_password_q">Forgot Password?</string>
+    <string name="sign_in_yandex">Sign in with Yandex</string>
+    <string name="dont_have_account">Don\'t have an account? Register</string>
+    <string name="already_have_account">Already have an account? Login</string>
+
+    <!-- Validators & UI state -->
+    <string name="email_invalid_format">Invalid email format (max 50 chars)</string>
+    <string name="password_required">Password required (max 50 chars)</string>
+    <string name="password_hint_register">8-50 chars, must include lower, upper, digit and special char</string>
+    <string name="passwords_dont_match">Passwords do not match</string>
+    <string name="show">SHOW</string>
+    <string name="hide">HIDE</string>
+
+    <!-- Email verification & Reset -->
+    <string name="verify_email_title">Verify your email</string>
+    <string name="verify_email_msg">We\'ve sent a verification link to %1$s. Please click the link to activate your account.</string>
+    <string name="check_your_email">Check your email</string>
+    <string name="password_reset_sent_msg">We\'ve sent a password reset link to %1$s. Please follow the link in the email to set a new password.</string>
+    <string name="email_verified_title">Email Verified!</string>
+    <string name="email_verified_msg">Your email has been successfully verified. You can now log in to your account.</string>
+    <string name="go_to_login">Go to Login</string>
+    <string name="resend_link">Resend Link</string>
+    <string name="resend_in">Resend in %1$s</string>
+
+    <!-- Home -->
+    <string name="your_statistics">Your Statistics</string>
+    <string name="recent_history">Recent History</string>
+    <string name="show_more">Show more</string>
+    <string name="no_history">No history yet</string>
+    <string name="stat_total">Total</string>
+    <string name="stat_solved">Solved</string>
+    <string name="stat_edited">Edited</string>
+    <string name="stat_direct">Direct</string>
+    <string name="logout">Logout</string>
+    <string name="settings">Settings</string>
+
+    <!-- Task Details -->
+    <string name="history_title">History</string>
+    <string name="solution_title">Solution</string>
+    <string name="original_equation">Original Equation</string>
+    <string name="edited_equation">Edited Equation</string>
+    <string name="step_by_step">Step-by-step Solution</string>
+    <string name="delete_solution_title">Delete Solution</string>
+    <string name="delete_solution_msg">Are you sure you want to delete this solution from history?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="give_feedback">Give Feedback</string>
+    <string name="task_not_found">Task not found</string>
+    <string name="recognition_ready">Recognition Ready</string>
+    <string name="recognition_ready_msg">Please confirm if the recognized equation is correct or edit it.</string>
+
+    <!-- Manual Entry -->
+    <string name="enter_equation">Enter Equation</string>
+    <string name="solve_equation">Solve Equation</string>
+
+    <!-- Dialogs -->
+    <string name="processing">Processing...</string>
+    <string name="is_this_correct">Is this correct?</string>
+    <string name="edit">Edit</string>
+    <string name="accept">Accept</string>
+    <string name="solved_success">Solved!</string>
+    <string name="error">Error</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="visual_editor">Visual Editor</string>
+    <string name="solve">Solve</string>
+    <string name="tap_to_focus">Tap to focus and edit</string>
 </resources>

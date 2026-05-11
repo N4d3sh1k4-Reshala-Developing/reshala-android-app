@@ -1,0 +1,88 @@
+<resources>
+    <string name="app_name">RE∫λALA</string>
+    <string name="alfa">alfa</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Главная</string>
+    <string name="nav_history">История</string>
+    <string name="nav_camera">Камера</string>
+    <string name="nav_manual">Ручной ввод</string>
+
+    <!-- Auth -->
+    <string name="login">Вход</string>
+    <string name="register">Регистрация</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="confirm_password">Подтвердите пароль</string>
+    <string name="forgot_password">Забыли пароль?</string>
+    <string name="reset_password">Сброс пароля</string>
+    <string name="back_to_login">Назад ко входу</string>
+    <string name="send_reset_link">Отправить ссылку</string>
+    <string name="remember_me">Запомнить меня</string>
+    <string name="forgot_password_q">Забыли пароль?</string>
+    <string name="sign_in_yandex">Войти через Яндекс</string>
+    <string name="dont_have_account">Нет аккаунта? Зарегистрироваться</string>
+    <string name="already_have_account">Уже есть аккаунт? Войти</string>
+
+    <!-- Validators & UI state -->
+    <string name="email_invalid_format">Неверный формат email (макс. 50 симв.)</string>
+    <string name="password_required">Введите пароль (макс. 50 симв.)</string>
+    <string name="password_hint_register">8-50 симв., заглавные, строчные буквы, цифры и спецсимволы</string>
+    <string name="passwords_dont_match">Пароли не совпадают</string>
+    <string name="show">ПОКАЗАТЬ</string>
+    <string name="hide">СКРЫТЬ</string>
+
+    <!-- Email verification & Reset -->
+    <string name="verify_email_title">Подтвердите email</string>
+    <string name="verify_email_msg">Мы отправили ссылку для подтверждения на %1$s. Пожалуйста, перейдите по ней для активации аккаунта.</string>
+    <string name="check_your_email">Проверьте почту</string>
+    <string name="password_reset_sent_msg">Мы отправили ссылку для сброса пароля на %1$s. Пожалуйста, следуйте инструкциям в письме.</string>
+    <string name="email_verified_title">Email подтвержден!</string>
+    <string name="email_verified_msg">Ваш email был успешно подтвержден. Теперь вы можете войти в свой аккаунт.</string>
+    <string name="go_to_login">Войти</string>
+    <string name="resend_link">Переотправить ссылку</string>
+    <string name="resend_in">Переотправить через %1$s</string>
+
+    <!-- Home -->
+    <string name="your_statistics">Ваша статистика</string>
+    <string name="recent_history">Недавняя история</string>
+    <string name="show_more">Показать еще</string>
+    <string name="no_history">Истории пока нет</string>
+    <string name="stat_total">Всего</string>
+    <string name="stat_solved">Решено</string>
+    <string name="stat_edited">Правки</string>
+    <string name="stat_direct">Вручную</string>
+    <string name="logout">Выйти</string>
+    <string name="settings">Настройки</string>
+
+    <!-- Task Details -->
+    <string name="history_title">История</string>
+    <string name="solution_title">Решение</string>
+    <string name="original_equation">Исходное уравнение</string>
+    <string name="edited_equation">Отредактировано</string>
+    <string name="step_by_step">Пошаговое решение</string>
+    <string name="delete_solution_title">Удалить решение</string>
+    <string name="delete_solution_msg">Вы уверены, что хотите удалить это решение из истории?</string>
+    <string name="delete">Удалить</string>
+    <string name="cancel">Отмена</string>
+    <string name="give_feedback">Оценить</string>
+    <string name="task_not_found">Задача не найдена</string>
+    <string name="recognition_ready">Распознавание готово</string>
+    <string name="recognition_ready_msg">Пожалуйста, проверьте правильность уравнения или отредактируйте его.</string>
+
+    <!-- Manual Entry -->
+    <string name="enter_equation">Введите уравнение</string>
+    <string name="solve_equation">Решить уравнение</string>
+
+    <!-- Dialogs -->
+    <string name="processing">Обработка…</string>
+    <string name="is_this_correct">Все верно?</string>
+    <string name="edit">Править</string>
+    <string name="accept">Принять</string>
+    <string name="solved_success">Решено!</string>
+    <string name="error">Ошибка</string>
+    <string name="dismiss">Закрыть</string>
+    <string name="visual_editor">Визуальный редактор</string>
+    <string name="solve">Решить</string>
+    <string name="tap_to_focus">Нажмите для редактирования</string>
+</resources>

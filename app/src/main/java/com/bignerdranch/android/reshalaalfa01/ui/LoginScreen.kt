@@ -14,6 +14,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.ui.theme.ReshalaAlfa01Theme
 import com.bignerdranch.android.reshalaalfa01.ui.util.Validator
 
@@ -41,7 +43,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            "Login", 
+            stringResource(R.string.login), 
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
@@ -51,7 +53,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text(stringResource(R.string.email)) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading,
             isError = email.isNotEmpty() && !isEmailValid,
@@ -59,7 +61,7 @@ fun LoginScreen(
             singleLine = true,
             supportingText = {
                 if (email.isNotEmpty() && !isEmailValid) {
-                    Text("Invalid email format (max 50 chars)")
+                    Text(stringResource(R.string.email_invalid_format))
                 }
             }
         )
@@ -68,7 +70,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text(stringResource(R.string.password)) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading,
             isError = password.isNotEmpty() && !isPasswordValid,
@@ -77,12 +79,15 @@ fun LoginScreen(
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Text(if (passwordVisible) "HIDE" else "SHOW", style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        if (passwordVisible) stringResource(R.string.hide) else stringResource(R.string.show), 
+                        style = MaterialTheme.typography.labelSmall
+                    )
                 }
             },
             supportingText = {
                 if (password.isNotEmpty() && !isPasswordValid) {
-                    Text("Password required (max 50 chars)")
+                    Text(stringResource(R.string.password_required))
                 }
             }
         )
@@ -98,13 +103,13 @@ fun LoginScreen(
                     onCheckedChange = { rememberMe = it },
                     enabled = !isLoading
                 )
-                Text("Remember Me", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.remember_me), style = MaterialTheme.typography.bodyMedium)
             }
             TextButton(
                 onClick = onForgotPasswordClick,
                 enabled = !isLoading
             ) {
-                Text("Forgot Password?")
+                Text(stringResource(R.string.forgot_password_q))
             }
         }
         
@@ -121,7 +126,7 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Login")
+                Text(stringResource(R.string.login))
             }
         }
         
@@ -136,7 +141,7 @@ fun LoginScreen(
                 contentColor = Color.Black
             )
         ) {
-            Text("Sign in with Yandex")
+            Text(stringResource(R.string.sign_in_yandex))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -145,7 +150,7 @@ fun LoginScreen(
             onClick = onNavigateToRegister,
             enabled = !isLoading
         ) {
-            Text("Don't have an account? Register")
+            Text(stringResource(R.string.dont_have_account))
         }
     }
 }

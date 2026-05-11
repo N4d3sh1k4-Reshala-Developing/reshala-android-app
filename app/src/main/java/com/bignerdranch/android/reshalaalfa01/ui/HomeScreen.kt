@@ -8,6 +8,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -25,6 +28,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.UserData
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.UserStatisticData
@@ -51,9 +56,11 @@ fun HomeScreen(
         topBar = {
             TopAppBar( 
                 title = { 
+                    val appName = stringResource(R.string.app_name)
+                    val alfa = stringResource(R.string.alfa)
                     Text(
                         text = buildAnnotatedString {
-                            append("Re∫λala")
+                            append(appName)
                             withStyle(
                                 style = SpanStyle(
                                     fontSize = 12.sp,
@@ -62,7 +69,7 @@ fun HomeScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
-                                append("alfa")
+                                append(alfa)
                             }
                         },
                         style = MaterialTheme.typography.titleLarge,
@@ -102,24 +109,67 @@ fun HomeScreen(
 
                         DropdownMenu(
                             expanded = showProfileMenu,
-                            onDismissRequest = { showProfileMenu = false }
+                            onDismissRequest = { showProfileMenu = false },
+                            modifier = Modifier.width(220.dp).padding(vertical = 4.dp),
+                            shape = MaterialTheme.shapes.large
                         ) {
                             userData?.let {
-                                Column(modifier = Modifier.padding(16.dp)) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                                ) {
                                     Text(
                                         text = it.username,
-                                        style = MaterialTheme.typography.titleSmall
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
                                         text = it.email,
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                HorizontalDivider()
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant
+                                )
                             }
+                            
                             DropdownMenuItem(
-                                text = { Text("Logout") },
+                                text = { Text(stringResource(R.string.settings), style = MaterialTheme.typography.bodyMedium) },
+                                leadingIcon = { 
+                                    Icon(
+                                        Icons.Default.Settings, 
+                                        contentDescription = null, 
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    ) 
+                                },
+                                onClick = {
+                                    showProfileMenu = false
+                                    // action for settings
+                                }
+                            )
+
+                            DropdownMenuItem(
+                                text = { 
+                                    Text(
+                                        stringResource(R.string.logout), 
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.error
+                                    ) 
+                                },
+                                leadingIcon = { 
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.Logout, 
+                                        contentDescription = null, 
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.error
+                                    ) 
+                                },
                                 onClick = {
                                     showProfileMenu = false
                                     onLogout()
@@ -156,7 +206,7 @@ fun HomeScreen(
                         .verticalScroll(rememberScrollState()),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No history yet", color = Color.Gray)
+                    Text(stringResource(R.string.no_history), color = Color.Gray)
                 }
             } else {
                 LazyColumn(
@@ -167,7 +217,7 @@ fun HomeScreen(
                     if (statistic != null) {
                         item {
                             Text(
-                                text = "Your Statistics",
+                                text = stringResource(R.string.your_statistics),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(bottom = 8.dp)
@@ -181,10 +231,10 @@ fun HomeScreen(
                                     modifier = Modifier.padding(16.dp).fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceAround
                                 ) {
-                                    StatItem("Total", statistic.totalTasks.toString())
-                                    StatItem("Solved", statistic.successTasks.toString())
-                                    StatItem("Edited", statistic.editedTasks.toString())
-                                    StatItem("Direct", statistic.directSolutionTasks.toString())
+                                    StatItem(stringResource(R.string.stat_total), statistic.totalTasks.toString())
+                                    StatItem(stringResource(R.string.stat_solved), statistic.successTasks.toString())
+                                    StatItem(stringResource(R.string.stat_edited), statistic.editedTasks.toString())
+                                    StatItem(stringResource(R.string.stat_direct), statistic.directSolutionTasks.toString())
                                 }
                             }
                         }
@@ -192,7 +242,7 @@ fun HomeScreen(
 
                     item {
                         Text(
-                            text = "Recent History",
+                            text = stringResource(R.string.recent_history),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
@@ -241,7 +291,7 @@ fun HomeScreen(
                             ) {
                                 TextButton(onClick = onShowMoreClick) {
                                     Text(
-                                        "Show more",
+                                        stringResource(R.string.show_more),
                                         color = ReshalaDarkBlue,
                                         fontWeight = FontWeight.Bold
                                     )

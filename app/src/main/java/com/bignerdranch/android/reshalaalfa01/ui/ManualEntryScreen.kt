@@ -10,6 +10,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.bignerdranch.android.reshalaalfa01.R
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -34,7 +36,7 @@ fun ManualEntryScreen(
         topBar = {
             if (!isLandscape) {
                 TopAppBar(
-                    title = { Text("Enter Equation", fontWeight = FontWeight.Bold) },
+                    title = { Text(stringResource(R.string.enter_equation), fontWeight = FontWeight.Bold) },
                     navigationIcon = {
                         IconButton(onClick = onClose) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -105,7 +107,7 @@ fun ManualEntryScreen(
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            "Solve", 
+                            stringResource(R.string.solve), 
                             style = MaterialTheme.typography.labelMedium,
                             maxLines = 1
                         )
@@ -159,7 +161,7 @@ fun ManualEntryScreen(
                 ) {
                     Icon(Icons.Default.Send, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Solve Equation", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.solve_equation), style = MaterialTheme.typography.titleMedium)
                 }
                 
                 Spacer(modifier = Modifier.height(80.dp))

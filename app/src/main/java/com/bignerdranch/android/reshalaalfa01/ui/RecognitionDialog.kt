@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.res.stringResource
+import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.RecognitionTaskData
 import com.bignerdranch.android.reshalaalfa01.ui.util.LatexText
 
@@ -99,7 +101,7 @@ fun RecognitionDialog(
                                 modifier = Modifier.padding(24.dp)
                             ) {
                                 CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                                Text("Processing...", style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.processing), style = MaterialTheme.typography.titleMedium)
                             }
                         }
                         is RecognitionState.ReadyForFeedback -> {
@@ -122,7 +124,7 @@ fun RecognitionDialog(
                                 modifier = Modifier.padding(24.dp)
                             ) {
                                 Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(64.dp))
-                                Text("Solved!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.solved_success), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                             }
                         }
                         is RecognitionState.Error -> {
@@ -132,9 +134,9 @@ fun RecognitionDialog(
                                 modifier = Modifier.padding(24.dp)
                             ) {
                                 Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(64.dp))
-                                Text("Error", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.error), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                                 Text(currentState.message, textAlign = TextAlign.Center)
-                                Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text("Dismiss") }
+                                Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.dismiss)) }
                             }
                         }
                         else -> {}
@@ -163,7 +165,7 @@ fun FeedbackView(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text("Is this correct?", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.is_this_correct), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
@@ -183,7 +185,7 @@ fun FeedbackView(
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Edit", maxLines = 1)
+                    Text(stringResource(R.string.edit), maxLines = 1)
                 }
                 Button(
                     onClick = { onAccept(data.id) }, 
@@ -192,7 +194,7 @@ fun FeedbackView(
                 ) {
                     Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Accept", maxLines = 1)
+                    Text(stringResource(R.string.accept), maxLines = 1)
                 }
             }
         }
@@ -206,12 +208,12 @@ fun FeedbackView(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    "Visual Editor", 
+                    stringResource(R.string.visual_editor), 
                     style = if (isLandscape) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge, 
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = { onEditingModeChange(false) }, modifier = Modifier.size(if (isLandscape) 32.dp else 48.dp)) {
-                    Icon(Icons.Default.Close, contentDescription = "Close")
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel))
                 }
             }
 
@@ -248,7 +250,7 @@ fun FeedbackView(
             ) {
                 if (!isLandscape) {
                     Text(
-                        "Tap to focus and edit", 
+                        stringResource(R.string.tap_to_focus), 
                         style = MaterialTheme.typography.labelMedium, 
                         color = Color.Gray
                     )
@@ -260,7 +262,7 @@ fun FeedbackView(
                 ) {
                     Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Solve")
+                    Text(stringResource(R.string.solve))
                 }
             }
         }

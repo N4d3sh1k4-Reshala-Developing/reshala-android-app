@@ -1,0 +1,88 @@
+<resources>
+    <string name="app_name">RE∫λALA</string>
+    <string name="alfa">alfa</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Головна</string>
+    <string name="nav_history">Історія</string>
+    <string name="nav_camera">Камера</string>
+    <string name="nav_manual">Ручне введення</string>
+
+    <!-- Auth -->
+    <string name="login">Вхід</string>
+    <string name="register">Реєстрація</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="confirm_password">Підтвердьте пароль</string>
+    <string name="forgot_password">Забули пароль?</string>
+    <string name="reset_password">Скидання пароля</string>
+    <string name="back_to_login">Назад до входу</string>
+    <string name="send_reset_link">Надіслати посилання</string>
+    <string name="remember_me">Запам\'ятати мене</string>
+    <string name="forgot_password_q">Забули пароль?</string>
+    <string name="sign_in_yandex">Увійти через Яндекс</string>
+    <string name="dont_have_account">Немає акаунта? Зареєструватися</string>
+    <string name="already_have_account">Вже є акаунт? Увійти</string>
+
+    <!-- Validators & UI state -->
+    <string name="email_invalid_format">Невірний формат email (макс. 50 симв.)</string>
+    <string name="password_required">Введіть пароль (макс. 50 симв.)</string>
+    <string name="password_hint_register">8-50 симв., великі, малі літери, цифри та спецсимволи</string>
+    <string name="passwords_dont_match">Паролі не збігаються</string>
+    <string name="show">ПОКАЗАТИ</string>
+    <string name="hide">ПРИХОВАТИ</string>
+
+    <!-- Email verification & Reset -->
+    <string name="verify_email_title">Підтвердьте email</string>
+    <string name="verify_email_msg">Ми надіслали посилання для підтвердження на %1$s. Будь ласка, перейдіть за ним для активації акаунта.</string>
+    <string name="check_your_email">Перевірте пошту</string>
+    <string name="password_reset_sent_msg">Ми надіслали посилання для скидання пароля на %1$s. Будь ласка, дотримуйтесь інструкцій у листі.</string>
+    <string name="email_verified_title">Email підтверджено!</string>
+    <string name="email_verified_msg">Ваш email успішно підтверджено. Тепер ви можете увійти до свого акаунта.</string>
+    <string name="go_to_login">Увійти</string>
+    <string name="resend_link">Перенадіслати посилання</string>
+    <string name="resend_in">Перенадіслати через %1$s</string>
+
+    <!-- Home -->
+    <string name="your_statistics">Ваша статистика</string>
+    <string name="recent_history">Недавня історія</string>
+    <string name="show_more">Показати ще</string>
+    <string name="no_history">Історії поки немає</string>
+    <string name="stat_total">Всього</string>
+    <string name="stat_solved">Вирішено</string>
+    <string name="stat_edited">Правки</string>
+    <string name="stat_direct">Вручну</string>
+    <string name="logout">Вийти</string>
+    <string name="settings">Налаштування</string>
+
+    <!-- Task Details -->
+    <string name="history_title">Історія</string>
+    <string name="solution_title">Рішення</string>
+    <string name="original_equation">Початкове рівняння</string>
+    <string name="edited_equation">Відредаговано</string>
+    <string name="step_by_step">Покрокове рішення</string>
+    <string name="delete_solution_title">Видалити рішення</string>
+    <string name="delete_solution_msg">Ви впевнені, що хочете видалити це рішення з історії?</string>
+    <string name="delete">Видалити</string>
+    <string name="cancel">Скасувати</string>
+    <string name="give_feedback">Оцінити</string>
+    <string name="task_not_found">Завдання не знайдено</string>
+    <string name="recognition_ready">Розпізнавання готове</string>
+    <string name="recognition_ready_msg">Будь ласка, перевірте правильність рівняння або відредагуйте його.</string>
+
+    <!-- Manual Entry -->
+    <string name="enter_equation">Введіть рівняння</string>
+    <string name="solve_equation">Вирішити рівняння</string>
+
+    <!-- Dialogs -->
+    <string name="processing">Обробка…</string>
+    <string name="is_this_correct">Все вірно?</string>
+    <string name="edit">Правити</string>
+    <string name="accept">Прийняти</string>
+    <string name="solved_success">Вирішено!</string>
+    <string name="error">Помилка</string>
+    <string name="dismiss">Закрити</string>
+    <string name="visual_editor">Візуальний редактор</string>
+    <string name="solve">Вирішити</string>
+    <string name="tap_to_focus">Натисніть для редагування</string>
+</resources>

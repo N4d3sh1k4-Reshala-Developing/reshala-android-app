@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.BuildConfig
 import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.SolutionStep
@@ -55,9 +57,11 @@ fun TaskDetailScreen(
         topBar = {
             TopAppBar(
                 title = { 
+                    val solutionTitle = stringResource(R.string.solution_title)
+                    val alfa = stringResource(R.string.alfa)
                     Text(
                         text = buildAnnotatedString {
-                            append("Solution")
+                            append(solutionTitle)
                             withStyle(
                                 style = SpanStyle(
                                     fontSize = 12.sp,
@@ -65,7 +69,7 @@ fun TaskDetailScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                             ) {
-                                append("alfa")
+                                append(alfa)
                             }
                         },
                         style = MaterialTheme.typography.titleLarge,
@@ -89,8 +93,8 @@ fun TaskDetailScreen(
                         if (showDeleteDialog) {
                             AlertDialog(
                                 onDismissRequest = { showDeleteDialog = false },
-                                title = { Text("Delete Solution") },
-                                text = { Text("Are you sure you want to delete this solution from history?") },
+                                title = { Text(stringResource(R.string.delete_solution_title)) },
+                                text = { Text(stringResource(R.string.delete_solution_msg)) },
                                 confirmButton = {
                                     TextButton(
                                         onClick = {
@@ -99,12 +103,12 @@ fun TaskDetailScreen(
                                         },
                                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                                     ) {
-                                        Text("Delete")
+                                        Text(stringResource(R.string.delete))
                                     }
                                 },
                                 dismissButton = {
                                     TextButton(onClick = { showDeleteDialog = false }) {
-                                        Text("Cancel")
+                                        Text(stringResource(R.string.cancel))
                                     }
                                 }
                             )
@@ -116,7 +120,7 @@ fun TaskDetailScreen(
     ) { padding ->
         if (task == null) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("Task not found", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+                Text(stringResource(R.string.task_not_found), style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
             }
         } else {
             LazyColumn(
@@ -162,13 +166,13 @@ fun TaskDetailScreen(
                         ) {
                             Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    "Recognition Ready",
+                                    stringResource(R.string.recognition_ready),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    "Please confirm if the recognized equation is correct or edit it.",
+                                    stringResource(R.string.recognition_ready_msg),
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -179,7 +183,7 @@ fun TaskDetailScreen(
                                 ) {
                                     Icon(Icons.Default.Check, contentDescription = null)
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Give Feedback")
+                                    Text(stringResource(R.string.give_feedback))
                                 }
                             }
                         }
@@ -200,7 +204,7 @@ fun TaskDetailScreen(
                             Column(modifier = Modifier.padding(16.dp)) {
                                 if (!isError) {
                                     Text(
-                                        text = "Original Equation", 
+                                        text = stringResource(R.string.original_equation), 
                                         fontWeight = FontWeight.Bold, 
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.primary
@@ -226,7 +230,7 @@ fun TaskDetailScreen(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "Edited Equation", 
+                                    text = stringResource(R.string.edited_equation), 
                                     fontWeight = FontWeight.Bold, 
                                     color = MaterialTheme.colorScheme.primary, 
                                     style = MaterialTheme.typography.labelLarge
@@ -245,7 +249,7 @@ fun TaskDetailScreen(
                 if (solutionSteps.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Step-by-step Solution", 
+                            text = stringResource(R.string.step_by_step),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 8.dp)
