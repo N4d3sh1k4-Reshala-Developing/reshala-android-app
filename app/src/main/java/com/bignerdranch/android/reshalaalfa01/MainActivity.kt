@@ -35,9 +35,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.res.stringResource
 import com.bignerdranch.android.reshalaalfa01.data.AuthRepository
+import com.bignerdranch.android.reshalaalfa01.data.UpdateRepository
 import com.bignerdranch.android.reshalaalfa01.data.local.AppDatabase
 import com.bignerdranch.android.reshalaalfa01.data.local.TokenManager
 import com.bignerdranch.android.reshalaalfa01.data.remote.AuthApiService
+import com.bignerdranch.android.reshalaalfa01.data.remote.GitHubApiService
 import com.bignerdranch.android.reshalaalfa01.data.remote.PersistentCookieJar
 import com.bignerdranch.android.reshalaalfa01.ui.*
 import com.bignerdranch.android.reshalaalfa01.ui.theme.ReshalaAlfa01Theme
@@ -104,13 +106,23 @@ class MainActivity : ComponentActivity() {
     }
     
     private val apiService by lazy { retrofit.create(AuthApiService::class.java) }
+    private val gitHubApiService by lazy { retrofit.create(GitHubApiService::class.java) }
     private lateinit var tokenManager: TokenManager
     private lateinit var repository: AuthRepository
+    private lateinit var updateRepository: UpdateRepository
 
     private val viewModel: AuthViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return AuthViewModel(repository) as T
+            }
+        }
+    }
+
+    private val updateViewModel: UpdateViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return UpdateViewModel(updateRepository) as T
             }
         }
     }
@@ -129,6 +141,7 @@ class MainActivity : ComponentActivity() {
         val database = AppDatabase.getDatabase(applicationContext)
         tokenManager = TokenManager(applicationContext)
         repository = AuthRepository(apiService, tokenManager, database.recognitionDao(), json)
+        updateRepository = UpdateRepository(gitHubApiService)
 
         super.onCreate(savedInstanceState)
         
@@ -137,7 +150,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ReshalaAlfa01Theme {
-                AuthNavigation(viewModel, recognitionViewModel)
+                AuthNavigation(viewModel, recognitionViewModel, updateViewModel)
             }
         }
     }
@@ -155,7 +168,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionViewModel) {
+fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionViewModel, updateViewModel: UpdateViewModel) {
     val authState by viewModel.authState.collectAsState()
     val userData by viewModel.userData.collectAsState()
     val userStatistic by viewModel.statistic.collectAsState()
@@ -164,10 +177,17 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
     val resendTimer by viewModel.resendTimer.collectAsState()
     
     val recognitionState by recognitionViewModel.state.collectAsState()
+    val updateState by updateViewModel.updateState.collectAsState()
     
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Authenticated) {
+            updateViewModel.checkForUpdates("N4d3sh1k4-Reshala-Developing", "reshala-android-app")
+        }
+    }
 
     val authOptions = remember {
         YandexAuthOptions(context, loggingEnabled = true)
@@ -208,6 +228,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 statistic = userStatistic,
                                 history = history,
                                 isRefreshing = isRefreshing,
+                                updateState = updateState,
                                 onRefresh = { viewModel.refreshHistory() },
                                 onLogout = { viewModel.logout() },
                                 onShowMoreClick = { authNavController.navigate("history") },

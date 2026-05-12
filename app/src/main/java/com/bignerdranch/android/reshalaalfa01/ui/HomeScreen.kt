@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalUriHandler
 import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.UserData
@@ -43,6 +44,7 @@ fun HomeScreen(
     statistic: UserStatisticData?,
     history: List<RecognitionEntity>,
     isRefreshing: Boolean,
+    updateState: UpdateState = UpdateState.Idle,
     onRefresh: () -> Unit,
     onLogout: () -> Unit,
     onShowMoreClick: () -> Unit,
@@ -51,6 +53,7 @@ fun HomeScreen(
     onFeedbackClick: (RecognitionEntity) -> Unit,
 ) {
     var showProfileMenu by remember { mutableStateOf(value = false) }
+    val uriHandler = LocalUriHandler.current
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -225,6 +228,44 @@ fun HomeScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    if (updateState is UpdateState.UpdateAvailable) {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                                ),
+                                shape = MaterialTheme.shapes.medium,
+                                onClick = { uriHandler.openUri(updateState.release.htmlUrl) }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(R.string.update_available),
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.update_version, updateState.release.tagName),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                    Text(
+                                        text = stringResource(R.string.update_download),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     if (statistic != null) {
                         item {
                             Text(

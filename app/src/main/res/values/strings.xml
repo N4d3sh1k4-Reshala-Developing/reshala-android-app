@@ -99,4 +99,9 @@
     <string name="visual_editor">Visual Editor</string>
     <string name="solve">Solve</string>
     <string name="tap_to_focus">Tap to focus and edit</string>
+
+    <!-- Updates -->
+    <string name="update_available">New version available!</string>
+    <string name="update_version">Version: %1$s</string>
+    <string name="update_download">DOWNLOAD</string>
 </resources>

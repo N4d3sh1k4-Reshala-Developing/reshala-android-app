@@ -99,4 +99,9 @@
     <string name="visual_editor">Визуальный редактор</string>
     <string name="solve">Решить</string>
     <string name="tap_to_focus">Нажмите для редактирования</string>
+
+    <!-- Updates -->
+    <string name="update_available">Доступна новая версия!</string>
+    <string name="update_version">Версия: %1$s</string>
+    <string name="update_download">СКАЧАТЬ</string>
 </resources>
