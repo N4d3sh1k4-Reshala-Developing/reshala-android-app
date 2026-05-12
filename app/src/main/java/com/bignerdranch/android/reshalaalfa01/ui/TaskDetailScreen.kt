@@ -1,7 +1,6 @@
 package com.bignerdranch.android.reshalaalfa01.ui
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -47,7 +46,7 @@ fun TaskDetailScreen(
             task?.solutionResult?.let {
                 json.decodeFromString<List<SolutionStep>>(it)
             } ?: emptyList()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }

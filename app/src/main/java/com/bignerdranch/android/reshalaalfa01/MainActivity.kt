@@ -34,7 +34,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.res.stringResource
-import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.data.AuthRepository
 import com.bignerdranch.android.reshalaalfa01.data.local.AppDatabase
 import com.bignerdranch.android.reshalaalfa01.data.local.TokenManager
@@ -306,7 +305,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                                 Icon(
                                                     Icons.Default.Functions, 
                                                     contentDescription = stringResource(R.string.nav_manual),
-                                                    tint = if (currentRoute == "manual") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
 

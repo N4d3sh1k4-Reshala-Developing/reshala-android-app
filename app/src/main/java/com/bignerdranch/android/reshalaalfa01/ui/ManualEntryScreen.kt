@@ -3,8 +3,6 @@ package com.bignerdranch.android.reshalaalfa01.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -14,11 +12,12 @@ import androidx.compose.ui.res.stringResource
 import com.bignerdranch.android.reshalaalfa01.R
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 import android.content.res.Configuration
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.ui.platform.LocalConfiguration
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +38,7 @@ fun ManualEntryScreen(
                     title = { Text(stringResource(R.string.enter_equation), fontWeight = FontWeight.Bold) },
                     navigationIcon = {
                         IconButton(onClick = onClose) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
                 )
@@ -58,7 +57,7 @@ fun ManualEntryScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 IconButton(onClick = onClose) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
 
                 Box(
@@ -102,7 +101,7 @@ fun ManualEntryScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            Icons.Default.Send, 
+                            Icons.AutoMirrored.Filled.Send,
                             contentDescription = null,
                             modifier = Modifier.size(20.dp)
                         )
@@ -159,7 +158,7 @@ fun ManualEntryScreen(
                     shape = MaterialTheme.shapes.medium,
                     enabled = equation.isNotBlank()
                 ) {
-                    Icon(Icons.Default.Send, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.solve_equation), style = MaterialTheme.typography.titleMedium)
                 }
