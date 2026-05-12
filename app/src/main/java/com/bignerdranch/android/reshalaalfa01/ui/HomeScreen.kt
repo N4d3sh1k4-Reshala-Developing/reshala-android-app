@@ -240,62 +240,79 @@ fun HomeScreen(
                         }
                     }
 
-                    item {
-                        Text(
-                            text = stringResource(R.string.recent_history),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
-                        )
-                    }
-
-                    val recentHistory = history.take(3)
-                    val groupedRecent = recentHistory.groupBy { formatToDate(it.createdAt) }
-
-                    groupedRecent.forEach { (date, itemsList) ->
+                    if (history.isNotEmpty()) {
                         item {
                             Text(
-                                text = date,
-                                style = MaterialTheme.typography.labelMedium,
+                                text = stringResource(R.string.recent_history),
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
                             )
                         }
-                        items(itemsList) { item ->
+
+                        val recentHistory = history.take(3)
+                        val groupedRecent = recentHistory.groupBy { formatToDate(it.createdAt) }
+
+                        groupedRecent.forEach { (date, itemsList) ->
+                            item {
+                                Text(
+                                    text = date,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                                )
+                            }
+                            items(itemsList) { item ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(MaterialTheme.shapes.large)
+                                        .clickable { 
+                                            if (item.status != "READY_FOR_FEEDBACK") {
+                                                onTaskClick(item.id)
+                                            }
+                                        }
+                                ) {
+                                    HistoryItemCard(
+                                        item = item,
+                                        onActionClick = if (item.status == "READY_FOR_FEEDBACK") {
+                                            { onFeedbackClick(item) }
+                                        } else null
+                                    )
+                                }
+                            }
+                        }
+                        
+                        if (history.size > 3) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    TextButton(onClick = onShowMoreClick) {
+                                        Text(
+                                            stringResource(R.string.show_more),
+                                            color = ReshalaDarkBlue,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else if (!isRefreshing) {
+                        item {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(MaterialTheme.shapes.large)
-                                    .clickable { 
-                                        if (item.status != "READY_FOR_FEEDBACK") {
-                                            onTaskClick(item.id)
-                                        }
-                                    }
-                            ) {
-                                HistoryItemCard(
-                                    item = item,
-                                    onActionClick = if (item.status == "READY_FOR_FEEDBACK") {
-                                        { onFeedbackClick(item) }
-                                    } else null
-                                )
-                            }
-                        }
-                    }
-                    
-                    if (history.size > 3) {
-                        item {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                    .padding(vertical = 32.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                TextButton(onClick = onShowMoreClick) {
-                                    Text(
-                                        stringResource(R.string.show_more),
-                                        color = ReshalaDarkBlue,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
+                                Text(
+                                    text = stringResource(R.string.no_history),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
+                                )
                             }
                         }
                     }
