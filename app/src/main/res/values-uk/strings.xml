@@ -54,6 +54,18 @@
     <string name="stat_direct">Вручну</string>
     <string name="logout">Вийти</string>
     <string name="settings">Налаштування</string>
+    <string name="faq">НЗП</string>
+
+    <!-- FAQ -->
+    <string name="faq_title">Типи підтримуємих рівнянь</string>
+    <string name="faq_description">Зараз додаток може вирішувати такі типи рівнянь та виразів:</string>
+    <string name="faq_expressions">Вирази (Спрощення та Розгортання)</string>
+    <string name="faq_linear">Линейные уравнения</string>
+    <string name="faq_quadratic">Квадратні рівняння</string>
+    <string name="faq_special">Спеціальна алгебра та радикали</string>
+    <string name="faq_polynomials">Багаточлени високих ступенів</string>
+    <string name="faq_trigonometry">Проста тригонометрія</string>
+    <string name="faq_exponential">Показові рівняння</string>
 
     <!-- Task Details -->
     <string name="history_title">Історія</string>
@@ -69,6 +81,7 @@
     <string name="task_not_found">Завдання не знайдено</string>
     <string name="recognition_ready">Розпізнавання готове</string>
     <string name="recognition_ready_msg">Будь ласка, перевірте правильність рівняння або відредагуйте його.</string>
+    <string name="feedback_email">Не сподобалось рішення?</string>
 
     <!-- Manual Entry -->
     <string name="enter_equation">Введіть рівняння</string>

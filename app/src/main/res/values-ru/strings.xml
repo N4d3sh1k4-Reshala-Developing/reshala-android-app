@@ -54,6 +54,18 @@
     <string name="stat_direct">Вручную</string>
     <string name="logout">Выйти</string>
     <string name="settings">Настройки</string>
+    <string name="faq">ЧЗВ</string>
+
+    <!-- FAQ -->
+    <string name="faq_title">Поддерживаемые типы уравнений</string>
+    <string name="faq_description">В настоящий момент приложение может решать следующие типы уравнений и выражений:</string>
+    <string name="faq_expressions">Выражения (Упрощение и Развертывание)</string>
+    <string name="faq_linear">Линейные уравнения</string>
+    <string name="faq_quadratic">Квадратные уравнения</string>
+    <string name="faq_special">Специальная алгебра и радикалы</string>
+    <string name="faq_polynomials">Многочлены высоких степеней</string>
+    <string name="faq_trigonometry">Простая тригонометрия</string>
+    <string name="faq_exponential">Показательные уравнения</string>
 
     <!-- Task Details -->
     <string name="history_title">История</string>
@@ -69,6 +81,7 @@
     <string name="task_not_found">Задача не найдена</string>
     <string name="recognition_ready">Распознавание готово</string>
     <string name="recognition_ready_msg">Пожалуйста, проверьте правильность уравнения или отредактируйте его.</string>
+    <string name="feedback_email">Есть проблемы с решением?</string>
 
     <!-- Manual Entry -->
     <string name="enter_equation">Введите уравнение</string>
