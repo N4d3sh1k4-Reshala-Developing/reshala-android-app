@@ -46,6 +46,7 @@ fun HomeScreen(
     onRefresh: () -> Unit,
     onLogout: () -> Unit,
     onShowMoreClick: () -> Unit,
+    onFAQClick: () -> Unit,
     onTaskClick: (String) -> Unit,
     onFeedbackClick: (RecognitionEntity) -> Unit,
 ) {
@@ -206,7 +207,17 @@ fun HomeScreen(
                         .verticalScroll(rememberScrollState()),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(stringResource(R.string.no_history), color = Color.Gray)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(stringResource(R.string.no_history), color = Color.Gray)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        TextButton(onClick = onFAQClick) {
+                            Text(
+                                stringResource(R.string.faq),
+                                color = ReshalaDarkBlue,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             } else {
                 LazyColumn(
@@ -250,7 +261,7 @@ fun HomeScreen(
                             )
                         }
 
-                        val recentHistory = history.take(3)
+                        val recentHistory = history.take(2)
                         val groupedRecent = recentHistory.groupBy { formatToDate(it.createdAt) }
 
                         groupedRecent.forEach { (date, itemsList) ->
@@ -284,12 +295,15 @@ fun HomeScreen(
                             }
                         }
                         
-                        if (history.size > 3) {
-                            item {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (history.size > 2) {
                                     TextButton(onClick = onShowMoreClick) {
                                         Text(
                                             stringResource(R.string.show_more),
@@ -297,22 +311,39 @@ fun HomeScreen(
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                }
+                                TextButton(onClick = onFAQClick) {
+                                    Text(
+                                        stringResource(R.string.faq),
+                                        color = ReshalaDarkBlue,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
                             }
                         }
                     } else if (!isRefreshing) {
                         item {
-                            Box(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 32.dp),
-                                contentAlignment = Alignment.Center
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
                             ) {
                                 Text(
                                     text = stringResource(R.string.no_history),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.Gray
                                 )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                TextButton(onClick = onFAQClick) {
+                                    Text(
+                                        stringResource(R.string.faq),
+                                        color = ReshalaDarkBlue,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
@@ -357,6 +388,7 @@ fun HomeScreenPreview() {
             onRefresh = {},
             onLogout = {},
             onShowMoreClick = {},
+            onFAQClick = {},
             onTaskClick = {},
             onFeedbackClick = { _ -> }
         )

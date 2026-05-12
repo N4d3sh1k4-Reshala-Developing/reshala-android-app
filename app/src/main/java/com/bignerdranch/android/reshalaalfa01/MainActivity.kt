@@ -211,6 +211,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 onRefresh = { viewModel.refreshHistory() },
                                 onLogout = { viewModel.logout() },
                                 onShowMoreClick = { authNavController.navigate("history") },
+                                onFAQClick = { authNavController.navigate("faq") },
                                 onTaskClick = { taskId -> authNavController.navigate("task/$taskId") },
                                 onFeedbackClick = { task -> recognitionViewModel.startFeedback(task) }
                             )
@@ -224,6 +225,9 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 onFeedbackClick = { task -> recognitionViewModel.startFeedback(task) },
                                 onBackClick = { authNavController.popBackStack() }
                             )
+                        }
+                        composable("faq") {
+                            FAQScreen(onBackClick = { authNavController.popBackStack() })
                         }
                         composable("task/{taskId}") { backStackEntry ->
                             val taskId = backStackEntry.arguments?.getString("taskId")
