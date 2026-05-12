@@ -25,8 +25,8 @@ android {
         applicationId = "com.bignerdranch.android.reshalaalfa01"
         minSdk = 31
         targetSdk = 35
-        versionCode = 1
-        versionName = "alfa_0.1"
+        versionCode = 2
+        versionName = "alfa_0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
