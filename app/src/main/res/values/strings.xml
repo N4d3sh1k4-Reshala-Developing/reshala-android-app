@@ -27,7 +27,7 @@
     <!-- Validators & UI state -->
     <string name="email_invalid_format">Invalid email format (max 50 chars)</string>
     <string name="password_required">Password required (max 50 chars)</string>
-    <string name="password_hint_register">8-50 chars, must include lower, upper, digit and special char</string>
+    <string name="password_hint_register">8–50 chars, must include lower, upper, digit and special char</string>
     <string name="passwords_dont_match">Passwords do not match</string>
     <string name="show">SHOW</string>
     <string name="hide">HIDE</string>
@@ -75,7 +75,7 @@
     <string name="solve_equation">Solve Equation</string>
 
     <!-- Dialogs -->
-    <string name="processing">Processing...</string>
+    <string name="processing">Processing…</string>
     <string name="is_this_correct">Is this correct?</string>
     <string name="edit">Edit</string>
     <string name="accept">Accept</string>

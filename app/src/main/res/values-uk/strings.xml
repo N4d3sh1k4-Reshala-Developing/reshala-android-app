@@ -27,7 +27,7 @@
     <!-- Validators & UI state -->
     <string name="email_invalid_format">Невірний формат email (макс. 50 симв.)</string>
     <string name="password_required">Введіть пароль (макс. 50 симв.)</string>
-    <string name="password_hint_register">8-50 симв., великі, малі літери, цифри та спецсимволи</string>
+    <string name="password_hint_register">8–50 симв., великі, малі літери, цифри та спецсимволи</string>
     <string name="passwords_dont_match">Паролі не збігаються</string>
     <string name="show">ПОКАЗАТИ</string>
     <string name="hide">ПРИХОВАТИ</string>
