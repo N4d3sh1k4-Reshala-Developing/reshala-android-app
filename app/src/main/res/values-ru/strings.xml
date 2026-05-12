@@ -62,6 +62,7 @@
     <string name="faq_expressions">Выражения (Упрощение и Развертывание)</string>
     <string name="faq_linear">Линейные уравнения</string>
     <string name="faq_quadratic">Квадратные уравнения</string>
+    <string name="faq_biquadratic">Биквадратные уравнения</string>
     <string name="faq_special">Специальная алгебра и радикалы</string>
     <string name="faq_polynomials">Многочлены высоких степеней</string>
     <string name="faq_trigonometry">Простая тригонометрия</string>

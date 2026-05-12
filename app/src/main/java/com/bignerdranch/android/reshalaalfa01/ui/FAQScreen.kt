@@ -70,6 +70,15 @@ fun FAQScreen(onBackClick: () -> Unit) {
                 )
             )
             FAQSection(
+                title = stringResource(R.string.faq_biquadratic),
+                examples = listOf(
+                    "x^4 - 5x^2 + 4 = 0",
+                    "x^4 - 10x^2 + 9 = 0",
+                    "x^4 - 13x^2 + 36 = 0",
+                    "x^4 - 3x^2 - 4 = 0"
+                )
+            )
+            FAQSection(
                 title = stringResource(R.string.faq_special),
                 examples = listOf(
                     "(x - 2)(x + 2) = 0",

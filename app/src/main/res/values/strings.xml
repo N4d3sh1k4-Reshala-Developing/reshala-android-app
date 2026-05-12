@@ -62,6 +62,7 @@
     <string name="faq_expressions">Expressions (Simplify &amp; Expand)</string>
     <string name="faq_linear">Linear Equations</string>
     <string name="faq_quadratic">Quadratic Equations</string>
+    <string name="faq_biquadratic">Biquadratic Equations</string>
     <string name="faq_special">Special Algebra &amp; Radicals</string>
     <string name="faq_polynomials">High-Degree Polynomials</string>
     <string name="faq_trigonometry">Trigonometry</string>

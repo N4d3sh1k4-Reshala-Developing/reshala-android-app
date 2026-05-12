@@ -62,6 +62,7 @@
     <string name="faq_expressions">Вирази (Спрощення та Розгортання)</string>
     <string name="faq_linear">Линейные уравнения</string>
     <string name="faq_quadratic">Квадратні рівняння</string>
+    <string name="faq_biquadratic">Бівадратні рівняння</string>
     <string name="faq_special">Спеціальна алгебра та радикали</string>
     <string name="faq_polynomials">Багаточлени високих ступенів</string>
     <string name="faq_trigonometry">Проста тригонометрія</string>
