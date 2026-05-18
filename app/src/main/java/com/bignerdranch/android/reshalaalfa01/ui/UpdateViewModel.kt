@@ -53,7 +53,7 @@ class UpdateViewModel(private val repository: UpdateRepository) : ViewModel() {
                 if (latest < current) return false
             }
             false
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             latestVersion != currentVersion && latestVersion > currentVersion
         }
     }
