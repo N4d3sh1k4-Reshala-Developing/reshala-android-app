@@ -58,6 +58,7 @@ class RecognitionViewModel(private val repository: AuthRepository) : ViewModel()
             _state.value = RecognitionState.Processing
             repository.solveManual(equation).onSuccess { response ->
                 if (response.success) {
+                    repository.fetchAndSaveHistory() // Update DB to show new manual task
                     startPolling(response.data.id)
                 } else {
                     _state.value = RecognitionState.Error("Solve request failed")
