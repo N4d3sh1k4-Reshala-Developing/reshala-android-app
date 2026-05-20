@@ -220,6 +220,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             _authState.value = AuthState.Loading
             val result = repository.confirmEmail(token)
             if (result.isSuccess) {
+                _authState.value = AuthState.Unauthenticated
                 _authState.value = AuthState.EmailVerified
             } else {
                 _authState.value = AuthState.Error("Verification failed")
