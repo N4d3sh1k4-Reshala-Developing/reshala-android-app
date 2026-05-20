@@ -3,7 +3,7 @@ package com.bignerdranch.android.reshalaalfa01.ui.util
 import android.util.Patterns
 
 object Validator {
-    private val PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()])[a-zA-Z\\d!@#$%^&*()]+$".toRegex()
+    private val PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()№_\\-+=|\\\\{}/?\\[\\].,;:'\"<>~`])[a-zA-Z\\d!@#$%^&*()№_\\-+=|\\\\{}/?\\[\\].,;:'\"<>~`]+$".toRegex()
 
     fun isValidEmail(email: String): Boolean {
         return email.isNotBlank() && 
