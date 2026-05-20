@@ -25,6 +25,7 @@ sealed class AuthState {
     data class AwaitingPasswordReset(val email: String) : AuthState()
     data class ResetPassword(val token: String) : AuthState()
     object EmailVerified : AuthState()
+    object PasswordResetSuccess : AuthState()
     data class Error(val message: String) : AuthState()
 }
 
@@ -175,7 +176,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             _authState.value = AuthState.Loading
             val result = repository.resetPassword(ResetPasswordRequest(token, pass, confirm))
             if (result.isSuccess) {
-                _authState.value = AuthState.Unauthenticated
+                _authState.value = AuthState.PasswordResetSuccess
             } else {
                 _authState.value = AuthState.Error("Reset password failed")
             }

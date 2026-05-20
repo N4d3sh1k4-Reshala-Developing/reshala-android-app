@@ -476,6 +476,41 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 viewModel.resetToLogin()
                             }
                         }
+                        is AuthState.PasswordResetSuccess -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.padding(24.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Verified,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(64.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Text(
+                                        stringResource(R.string.password_reset_success_title),
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        stringResource(R.string.password_reset_success_msg),
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Spacer(modifier = Modifier.height(32.dp))
+                                    Button(
+                                        onClick = { viewModel.resetToLogin() },
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(stringResource(R.string.go_to_login))
+                                    }
+                                }
+                            }
+                        }
                         is AuthState.Error -> {
                             LaunchedEffect(state) {
                                 snackbarHostState.showSnackbar(state.message)

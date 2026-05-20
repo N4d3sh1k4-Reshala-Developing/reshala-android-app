@@ -42,6 +42,8 @@
     <string name="go_to_login">Увійти</string>
     <string name="resend_link">Перенадіслати посилання</string>
     <string name="resend_in">Перенадіслати через %1$s</string>
+    <string name="password_reset_success_title">Пароль успішно змінено!</string>
+    <string name="password_reset_success_msg">Ваш пароль був успішно змінен. Ви можете увійти до системи з новим паролем.</string>
 
     <!-- Home -->
     <string name="your_statistics">Ваша статистика</string>
