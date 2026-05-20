@@ -104,6 +104,7 @@ class RecognitionViewModel(private val repository: AuthRepository) : ViewModel()
             _state.value = RecognitionState.Processing
             val editStatus = if (accepted) "false" else "true"
             repository.sendFeedback(taskId, editStatus, editedResult).onSuccess {
+                repository.fetchAndSaveHistory() // Update DB after feedback
                 startPolling(taskId)
             }.onFailure {
                 _state.value = RecognitionState.Error(it.message ?: "Feedback failed")
