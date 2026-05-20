@@ -348,7 +348,7 @@ fun HomeScreen(
                                     TextButton(onClick = onShowMoreClick) {
                                         Text(
                                             stringResource(R.string.show_more),
-                                            color = ReshalaDarkBlue,
+                                            color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
@@ -357,7 +357,7 @@ fun HomeScreen(
                                 TextButton(onClick = onFAQClick) {
                                     Text(
                                         stringResource(R.string.faq),
-                                        color = ReshalaDarkBlue,
+                                        color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -381,7 +381,7 @@ fun HomeScreen(
                                 TextButton(onClick = onFAQClick) {
                                     Text(
                                         stringResource(R.string.faq),
-                                        color = ReshalaDarkBlue,
+                                        color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
