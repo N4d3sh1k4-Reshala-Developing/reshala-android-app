@@ -102,6 +102,11 @@
     <string name="solve">Вирішити</string>
     <string name="tap_to_focus">Натисніть для редагування</string>
 
+    <!-- Social Linking -->
+    <string name="link_account_title">Линкування аккаунту</string>
+    <string name="link_account_msg">Аккаунт з цією поштою %1$s вже зареєстрований. Enter the password for your existing account to link your Yandex login to it.</string>
+    <string name="link_account_button">Злінкувати аккаунт</string>
+
     <!-- Updates -->
     <string name="update_available">Доступна нова версія!</string>
     <string name="update_version">Верся: %1$s</string>
