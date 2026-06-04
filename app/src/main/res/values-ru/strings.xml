@@ -102,6 +102,11 @@
     <string name="solve">Решить</string>
     <string name="tap_to_focus">Нажмите для редактирования</string>
 
+    <!-- Social Linking -->
+    <string name="link_account_title">Привязка аккаунта</string>
+    <string name="link_account_msg">Аккаунт с email %1$s уже зарегистрирован. Введите пароль от вашего существующего аккаунта, чтобы привязать к нему вход через Яндекс.</string>
+    <string name="link_account_button">Привязать аккаунт</string>
+
     <!-- Updates -->
     <string name="update_available">Доступна новая версия!</string>
     <string name="update_version">Версия: %1$s</string>

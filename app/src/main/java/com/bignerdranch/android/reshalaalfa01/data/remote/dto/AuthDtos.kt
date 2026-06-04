@@ -25,8 +25,12 @@ data class LoginResponse(
 
 @Serializable
 data class AuthData(
-    val accessToken: String,
-    val type: String
+    val accessToken: String? = null,
+    val type: String? = null,
+    val email: String? = null,
+    val provider: String? = null,
+    val providerUserId: String? = null,
+    val error: String? = null
 )
 
 @Serializable
@@ -50,6 +54,14 @@ data class ResetPasswordRequest(
 @Serializable
 data class YandexLoginRequest(
     val accessToken: String
+)
+
+@Serializable
+data class LinkSocialRequest(
+    val email: String,
+    val password: String,
+    val provider: String,
+    val providerUserId: String
 )
 
 @Serializable

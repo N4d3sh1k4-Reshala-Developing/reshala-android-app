@@ -470,6 +470,15 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 }
                             }
                         }
+                        is AuthState.SocialLinkRequired -> {
+                            SocialLinkScreen(
+                                email = state.email,
+                                error = state.error,
+                                isLoading = false,
+                                onLinkClick = { viewModel.linkSocial(it) },
+                                onBackClick = { viewModel.resetToLogin() }
+                            )
+                        }
                         is AuthState.EmailVerified -> {
                             LaunchedEffect(Unit) {
                                 snackbarHostState.showSnackbar(context.getString(R.string.email_verified_title))

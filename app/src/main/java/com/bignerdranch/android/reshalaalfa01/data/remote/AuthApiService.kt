@@ -23,6 +23,8 @@ interface AuthApiService {
     suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<Unit>
     @POST("auth/yandex-mobile")
     suspend fun loginWithYandex(@Body request: YandexLoginRequest): Response<LoginResponse>
+    @POST("auth/link-social")
+    suspend fun linkSocial(@Body request: LinkSocialRequest): Response<LoginResponse>
     @POST("auth/refresh")
     suspend fun refresh(): Response<LoginResponse>
 

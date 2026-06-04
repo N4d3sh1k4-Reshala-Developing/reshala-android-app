@@ -102,6 +102,11 @@
     <string name="solve">Solve</string>
     <string name="tap_to_focus">Tap to focus and edit</string>
 
+    <!-- Social Linking -->
+    <string name="link_account_title">Account Linking</string>
+    <string name="link_account_msg">Account with email %1$s is already registered. Enter the password for your existing account to link your Yandex login to it.</string>
+    <string name="link_account_button">Link Account</string>
+
     <!-- Updates -->
     <string name="update_available">New version available!</string>
     <string name="update_version">Version: %1$s</string>

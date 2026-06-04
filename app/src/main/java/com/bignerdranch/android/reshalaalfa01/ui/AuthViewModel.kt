@@ -24,6 +24,12 @@ sealed class AuthState {
     object ForgotPassword : AuthState()
     data class AwaitingPasswordReset(val email: String) : AuthState()
     data class ResetPassword(val token: String) : AuthState()
+    data class SocialLinkRequired(
+        val email: String,
+        val provider: String,
+        val providerUserId: String,
+        val error: String? = null
+    ) : AuthState()
     object EmailVerified : AuthState()
     object PasswordResetSuccess : AuthState()
     data class Error(val message: String) : AuthState()
@@ -130,18 +136,54 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private fun handleAuthResult(result: Result<com.bignerdranch.android.reshalaalfa01.data.remote.dto.LoginResponse>, email: String) {
         result.onSuccess { loginResponse ->
-            if (loginResponse.error?.code == "EMAIL_NOT_VERIFIED") {
+            val data = loginResponse.data
+            val errorCode = loginResponse.error?.code ?: data?.error
+            
+            if (errorCode == "EMAIL_NOT_VERIFIED") {
                 resendConfirmation(email)
                 _authState.value = AuthState.AwaitingVerification(email)
-            } else if (loginResponse.success) {
+            } else if (errorCode == "email_exists_link_required") {
+                _authState.value = AuthState.SocialLinkRequired(
+                    email = data?.email ?: email,
+                    provider = data?.provider ?: "",
+                    providerUserId = data?.providerUserId ?: ""
+                )
+            } else if (loginResponse.success && data?.accessToken != null) {
                 _authState.value = AuthState.Authenticated
                 fetchUserData()
                 refreshHistory()
             } else {
-                _authState.value = AuthState.Error(loginResponse.error?.message ?: "Login failed")
+                val currentState = _authState.value
+                val message = loginResponse.error?.message ?: data?.error ?: "Login failed"
+                if (currentState is AuthState.SocialLinkRequired) {
+                    _authState.value = currentState.copy(error = message)
+                } else {
+                    _authState.value = AuthState.Error(message)
+                }
             }
         }.onFailure {
-            _authState.value = AuthState.Error(it.message ?: "Auth failed")
+            val currentState = _authState.value
+            if (currentState is AuthState.SocialLinkRequired) {
+                _authState.value = currentState.copy(error = it.message ?: "Auth failed")
+            } else {
+                _authState.value = AuthState.Error(it.message ?: "Auth failed")
+            }
+        }
+    }
+
+    fun linkSocial(password: String) {
+        val currentState = _authState.value as? AuthState.SocialLinkRequired ?: return
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            val result = repository.linkSocial(
+                com.bignerdranch.android.reshalaalfa01.data.remote.dto.LinkSocialRequest(
+                    email = currentState.email,
+                    password = password,
+                    provider = currentState.provider,
+                    providerUserId = currentState.providerUserId
+                )
+            )
+            handleAuthResult(result, currentState.email)
         }
     }
 

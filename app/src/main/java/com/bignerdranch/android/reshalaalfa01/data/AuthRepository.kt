@@ -42,14 +42,27 @@ class AuthRepository(
 
     private suspend fun handleLoginResponse(response: Response<LoginResponse>): Result<LoginResponse> {
         return if (response.isSuccessful && response.body() != null) {
-            tokenManager.saveAccessToken(response.body()!!.data!!.accessToken)
-            Result.success(response.body()!!)
-        } else if (response.code() == 403) {
+            val body = response.body()!!
+            // Только если есть токен, сохраняем его
+            body.data?.accessToken?.let { 
+                tokenManager.saveAccessToken(it)
+            }
+            Result.success(body)
+        } else if (response.code() == 403 || response.code() == 409) {
             val errorBody = response.errorBody()?.string()
             val errorResponse = json.decodeFromString<LoginResponse>(errorBody ?: "")
             Result.success(errorResponse)
         } else {
             Result.failure(Exception("Auth failed: ${response.code()}"))
+        }
+    }
+
+    suspend fun linkSocial(request: LinkSocialRequest): Result<LoginResponse> {
+        return try {
+            val response = apiService.linkSocial(request)
+            handleLoginResponse(response)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
@@ -182,8 +195,10 @@ class AuthRepository(
     suspend fun refresh(): Result<Unit> {
         return try {
             val response = apiService.refresh()
-            if (response.isSuccessful && response.body() != null) {
-                tokenManager.saveAccessToken(response.body()!!.data!!.accessToken)
+            val body = response.body()
+            val newToken = body?.data?.accessToken
+            if (response.isSuccessful && newToken != null) {
+                tokenManager.saveAccessToken(newToken)
                 Result.success(Unit)
             } else {
                 tokenManager.clearAccessToken()
