@@ -26,3 +26,5 @@ val DarkOnSurface = Color(0xFFE2E2E6)
 val DarkOnBackground = Color(0xFFE2E2E6)
 val DarkOutline = Color(0xFF3F4759) // Более приглушенный цвет для рамок
 val DarkSurfaceVariant = Color(0xFF282A31)
+
+val YandexYellow = Color(0xFFFFCC00)

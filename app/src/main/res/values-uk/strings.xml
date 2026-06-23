@@ -111,4 +111,13 @@
     <string name="update_available">Доступна нова версія!</string>
     <string name="update_version">Верся: %1$s</string>
     <string name="update_download">ЗАВАНТАЖИТИ</string>
+
+    <!-- Settings -->
+    <string name="account_info">Інформація про акаунт</string>
+    <string name="username">Ім\'я користувача</string>
+    <string name="linked_services">Прив\'язані сервіси</string>
+    <string name="link_yandex_desc">Прив\'яжіть акаунт Яндекс для швидкого входу наступного разу.</string>
+    <string name="connected">Підключено</string>
+    <string name="not_connected">Не підключено</string>
+    <string name="link_yandex">Прив\'язати Яндекс</string>
 </resources>

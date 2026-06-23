@@ -9,8 +9,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.bignerdranch.android.reshalaalfa01.R
 import com.bignerdranch.android.reshalaalfa01.ui.util.LatexText
 
@@ -20,10 +25,28 @@ fun FAQScreen(onBackClick: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.faq_title)) },
+                title = {
+                    Text(
+                        text = buildAnnotatedString {
+                            append(stringResource(R.string.faq_title))
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 12.sp,
+                                    baselineShift = BaselineShift.Superscript,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                append(stringResource(R.string.alfa))
+                            }
+                        },
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 }
             )

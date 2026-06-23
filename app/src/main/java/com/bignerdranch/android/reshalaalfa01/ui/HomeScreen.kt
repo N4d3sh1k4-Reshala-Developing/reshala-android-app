@@ -49,6 +49,7 @@ fun HomeScreen(
     onLogout: () -> Unit,
     onShowMoreClick: () -> Unit,
     onFAQClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     onTaskClick: (String) -> Unit,
     onFeedbackClick: (RecognitionEntity) -> Unit,
 ) {
@@ -154,7 +155,7 @@ fun HomeScreen(
                                 },
                                 onClick = {
                                     showProfileMenu = false
-                                    // action for settings
+                                    onSettingsClick()
                                 }
                             )
 
@@ -430,6 +431,7 @@ fun HomeScreenPreview() {
             onLogout = {},
             onShowMoreClick = {},
             onFAQClick = {},
+            onSettingsClick = {},
             onTaskClick = {},
             onFeedbackClick = { _ -> }
         )

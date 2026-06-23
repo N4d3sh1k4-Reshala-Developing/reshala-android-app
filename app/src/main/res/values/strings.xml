@@ -111,4 +111,13 @@
     <string name="update_available">New version available!</string>
     <string name="update_version">Version: %1$s</string>
     <string name="update_download">DOWNLOAD</string>
+
+    <!-- Settings -->
+    <string name="account_info">Account Information</string>
+    <string name="username">Username</string>
+    <string name="linked_services">Linked Services</string>
+    <string name="link_yandex_desc">Link your Yandex account for easier login next time.</string>
+    <string name="connected">Connected</string>
+    <string name="not_connected">Not connected</string>
+    <string name="link_yandex">Link Yandex</string>
 </resources>

@@ -31,8 +31,6 @@ interface AuthApiService {
     //--UserAccountData
     @GET("user")
     suspend fun getUser(@Header("Authorization") token: String): Response<UserResponse>
-
-
     @GET("equation/user/history")
     suspend fun getRecognitionHistory(@Header("Authorization") token: String): Response<RecognitionHistoryResponse>
     @GET("equation/user/statistic")

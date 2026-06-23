@@ -182,11 +182,10 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
 
-    LaunchedEffect(authState) {
-        if (authState is AuthState.Authenticated) {
-            updateViewModel.checkForUpdates("N4d3sh1k4-Reshala-Developing", "reshala-android-app")
-        }
+    LaunchedEffect(Unit) {
+        updateViewModel.checkForUpdates("N4d3sh1k4-Reshala-Developing", "reshala-android-app")
     }
 
     val authOptions = remember {
@@ -233,8 +232,18 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 onLogout = { viewModel.logout() },
                                 onShowMoreClick = { authNavController.navigate("history") },
                                 onFAQClick = { authNavController.navigate("faq") },
+                                onSettingsClick = { authNavController.navigate("settings") },
                                 onTaskClick = { taskId -> authNavController.navigate("task/$taskId") },
                                 onFeedbackClick = { task -> recognitionViewModel.startFeedback(task) }
+                            )
+                        }
+                        composable("settings") {
+                            SettingsScreen(
+                                userData = userData,
+                                onYandexLinkClick = {
+                                    yandexLauncher.launch(YandexAuthLoginOptions())
+                                },
+                                onBackClick = { authNavController.popBackStack() }
                             )
                         }
                         composable("history") {
@@ -531,6 +540,8 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 composable("login") {
                                     LoginScreen(
                                         isLoading = false,
+                                        updateState = updateState,
+                                        onUpdateClick = { uriHandler.openUri(it) },
                                         onNavigateToRegister = { navController.navigate("register") },
                                         onLoginClick = { email, pass, rememberMe -> 
                                             viewModel.login(email, pass, rememberMe)

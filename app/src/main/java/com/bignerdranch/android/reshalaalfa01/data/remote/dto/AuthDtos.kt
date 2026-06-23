@@ -73,5 +73,14 @@ data class UserResponse(
 @Serializable
 data class UserData(
     val username: String,
-    val email: String
+    val email: String,
+    val identities: List<UserIdentityDto> = emptyList()
+)
+
+@Serializable
+data class UserIdentityDto(
+    val id: String? = null,
+    val provider: String,
+    val providerUserId: String,
+    val createdAt: String? = null
 )

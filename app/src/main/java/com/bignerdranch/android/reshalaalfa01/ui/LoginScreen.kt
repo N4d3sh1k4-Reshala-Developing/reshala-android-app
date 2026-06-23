@@ -19,6 +19,8 @@ import com.bignerdranch.android.reshalaalfa01.ui.util.Validator
 @Composable
 fun LoginScreen(
     isLoading: Boolean,
+    updateState: UpdateState = UpdateState.Idle,
+    onUpdateClick: (String) -> Unit = {},
     onNavigateToRegister: () -> Unit,
     onLoginClick: (String, String, Boolean) -> Unit,
     onForgotPasswordClick: () -> Unit,
@@ -39,6 +41,42 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        if (updateState is UpdateState.UpdateAvailable) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                ),
+                shape = MaterialTheme.shapes.medium,
+                onClick = { onUpdateClick(updateState.release.htmlUrl) }
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.update_available),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = stringResource(R.string.update_version, updateState.release.tagName),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.update_download),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
         Text(
             stringResource(R.string.login), 
             style = MaterialTheme.typography.headlineLarge,
