@@ -13,7 +13,7 @@ fun getSecret(key: String, local: Properties): String {
 
 android {
     namespace = "com.bignerdranch.android.reshalaalfa01"
-    compileSdk = 35
+    compileSdk = 37
 
     val localProperties = Properties()
     val localPropertiesFile = rootProject.file("local.properties")
@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.bignerdranch.android.reshalaalfa01"
-        minSdk = 31
+        minSdk = 29
         targetSdk = 35
         versionCode = 2
         versionName = "v0.7.0-alpha"
@@ -53,7 +53,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -75,15 +76,13 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.2")
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.material.icons.extended)
-
     implementation(libs.androidx.compose.material.icons.extended)
     
     implementation(libs.retrofit)
@@ -104,10 +103,9 @@ dependencies {
     implementation(libs.authsdk)
     
     // Markwon for Markdown and LaTeX rendering
-    val markwonVersion = "4.6.2"
-    implementation("io.noties.markwon:core:$markwonVersion")
-    implementation("io.noties.markwon:ext-latex:$markwonVersion")
-    implementation("io.noties.markwon:inline-parser:$markwonVersion") // Required for inline LaTeX like $x$
+    implementation(libs.markwon.core)
+    implementation(libs.markwon.ext.latex)
+    implementation(libs.markwon.inline.parser)
     
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
