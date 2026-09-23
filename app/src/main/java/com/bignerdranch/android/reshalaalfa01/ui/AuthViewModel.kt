@@ -134,6 +134,14 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
+    fun loginWithVk(code: String, codeVerifier: String, deviceId: String, state: String?) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            val result = repository.loginWithVk(code, codeVerifier, deviceId, state)
+            handleAuthResult(result, "VK User")
+        }
+    }
+
     private fun handleAuthResult(result: Result<com.bignerdranch.android.reshalaalfa01.data.remote.dto.LoginResponse>, email: String) {
         result.onSuccess { loginResponse ->
             val data = loginResponse.data
@@ -142,7 +150,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             if (errorCode == "EMAIL_NOT_VERIFIED") {
                 resendConfirmation(email)
                 _authState.value = AuthState.AwaitingVerification(email)
-            } else if (errorCode == "email_exists_link_required") {
+            } else if (errorCode?.equals("email_exists_link_required", ignoreCase = true) == true) {
                 _authState.value = AuthState.SocialLinkRequired(
                     email = data?.email ?: email,
                     provider = data?.provider ?: "",
@@ -161,12 +169,13 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
                     _authState.value = AuthState.Error(message)
                 }
             }
-        }.onFailure {
+        }.onFailure { exception ->
+            val message = exception.message ?: "Auth failed"
             val currentState = _authState.value
             if (currentState is AuthState.SocialLinkRequired) {
-                _authState.value = currentState.copy(error = it.message ?: "Auth failed")
+                _authState.value = currentState.copy(error = message)
             } else {
-                _authState.value = AuthState.Error(it.message ?: "Auth failed")
+                _authState.value = AuthState.Error(message)
             }
         }
     }

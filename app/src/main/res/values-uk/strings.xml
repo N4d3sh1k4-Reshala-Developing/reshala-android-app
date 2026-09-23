@@ -21,6 +21,7 @@
     <string name="remember_me">Запам\'ятати мене</string>
     <string name="forgot_password_q">Забули пароль?</string>
     <string name="sign_in_yandex">Увійти через Яндекс</string>
+    <string name="sign_in_vk">Увійти через VK</string>
     <string name="dont_have_account">Немає акаунта? Зареєструватися</string>
     <string name="already_have_account">Вже є акаунт? Увійти</string>
 
@@ -117,7 +118,9 @@
     <string name="username">Ім\'я користувача</string>
     <string name="linked_services">Прив\'язані сервіси</string>
     <string name="link_yandex_desc">Прив\'яжіть акаунт Яндекс для швидкого входу наступного разу.</string>
+    <string name="link_vk_desc">Прив\'яжіть акаунт VK для швидкого входу наступного разу.</string>
     <string name="connected">Підключено</string>
     <string name="not_connected">Не підключено</string>
     <string name="link_yandex">Прив\'язати Яндекс</string>
+    <string name="link_vk">Прив\'язати VK</string>
 </resources>

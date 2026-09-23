@@ -40,6 +40,15 @@ class AuthRepository(
         }
     }
 
+    suspend fun loginWithVk(code: String, codeVerifier: String, deviceId: String, state: String?): Result<LoginResponse> {
+        return try {
+            val response = apiService.loginWithVk(VkLoginRequest(code, codeVerifier, deviceId, state))
+            handleLoginResponse(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     private suspend fun handleLoginResponse(response: Response<LoginResponse>): Result<LoginResponse> {
         return if (response.isSuccessful && response.body() != null) {
             val body = response.body()!!
@@ -50,8 +59,12 @@ class AuthRepository(
             Result.success(body)
         } else if (response.code() == 403 || response.code() == 409) {
             val errorBody = response.errorBody()?.string()
-            val errorResponse = json.decodeFromString<LoginResponse>(errorBody ?: "")
-            Result.success(errorResponse)
+            try {
+                val errorResponse = json.decodeFromString<LoginResponse>(errorBody ?: "")
+                Result.success(errorResponse)
+            } catch (e: Exception) {
+                Result.failure(Exception("Auth failed with code ${response.code()} and invalid error body"))
+            }
         } else {
             Result.failure(Exception("Auth failed: ${response.code()}"))
         }

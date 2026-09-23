@@ -9,6 +9,8 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        maven(url = "https://nexus-external.vkteam.ru/repository/vkid-sdk-android/")
+        maven(url = "https://nexus-external.vkteam.ru/repository/maven/")
     }
 }
 plugins {
@@ -19,6 +21,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven(url = "https://nexus-external.vkteam.ru/repository/vkid-sdk-android/")
+        maven(url = "https://nexus-external.vkteam.ru/repository/maven/")
     }
 }
 

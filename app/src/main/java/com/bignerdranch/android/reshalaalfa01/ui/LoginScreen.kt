@@ -24,7 +24,8 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onLoginClick: (String, String, Boolean) -> Unit,
     onForgotPasswordClick: () -> Unit,
-    onYandexLoginClick: () -> Unit
+    onYandexLoginClick: () -> Unit,
+    onVkLoginClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -179,6 +180,20 @@ fun LoginScreen(
             Text(stringResource(R.string.sign_in_yandex))
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onVkLoginClick,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF0077FF),
+                contentColor = Color.White
+            )
+        ) {
+            Text(stringResource(R.string.sign_in_vk))
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         TextButton(
@@ -199,7 +214,8 @@ fun LoginScreenPreview() {
             onNavigateToRegister = {},
             onLoginClick = { _, _, _ -> },
             onForgotPasswordClick = {},
-            onYandexLoginClick = {}
+            onYandexLoginClick = {},
+            onVkLoginClick = {}
         )
     }
 }

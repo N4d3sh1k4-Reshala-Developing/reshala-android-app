@@ -27,6 +27,8 @@ interface AuthApiService {
     suspend fun linkSocial(@Body request: LinkSocialRequest): Response<LoginResponse>
     @POST("auth/refresh")
     suspend fun refresh(): Response<LoginResponse>
+    @POST("auth/vk-mobile")
+    suspend fun loginWithVk(@Body request: VkLoginRequest): Response<LoginResponse>
 
     //--UserAccountData
     @GET("user")

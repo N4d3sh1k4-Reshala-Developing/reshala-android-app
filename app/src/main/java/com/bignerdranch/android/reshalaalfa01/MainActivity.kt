@@ -44,11 +44,17 @@ import com.bignerdranch.android.reshalaalfa01.data.remote.PersistentCookieJar
 import com.bignerdranch.android.reshalaalfa01.ui.*
 import com.bignerdranch.android.reshalaalfa01.ui.theme.ReshalaAlfa01Theme
 import com.bignerdranch.android.reshalaalfa01.ui.util.Validator
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.yandex.authsdk.YandexAuthLoginOptions
 import com.yandex.authsdk.YandexAuthOptions
 import com.yandex.authsdk.YandexAuthResult
 import com.yandex.authsdk.YandexAuthSdk
+import com.vk.id.VKID
+import com.vk.id.AccessToken
+import com.vk.id.VKIDAuthFail
+import com.vk.id.auth.VKIDAuthCallback
+import com.vk.id.auth.VKIDAuthParams
+import com.vk.id.auth.AuthCodeData
 import java.util.Locale
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
@@ -188,10 +194,24 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
         updateViewModel.checkForUpdates("N4d3sh1k4-Reshala-Developing", "reshala-android-app")
     }
 
+    val activity = context as? ComponentActivity
+
     val authOptions = remember {
         YandexAuthOptions(context, loggingEnabled = true)
     }
     val yandexAuthSdk = remember { YandexAuthSdk.create(authOptions) }
+
+    val vkid = remember { VKID.instance }
+    
+    val vkidCallback: VKIDAuthCallback = remember {
+        object : VKIDAuthCallback {
+            override fun onAuth(accessToken: AccessToken) {}
+            override fun onAuthCode(data: AuthCodeData, isCompletion: Boolean) {
+                viewModel.loginWithVk(data.code, "", data.deviceId, null)
+            }
+            override fun onFail(fail: VKIDAuthFail) {}
+        }
+    }
 
     val yandexLauncher = rememberLauncherForActivityResult(yandexAuthSdk.contract) { result ->
         when (result) {
@@ -242,6 +262,12 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 userData = userData,
                                 onYandexLinkClick = {
                                     yandexLauncher.launch(YandexAuthLoginOptions())
+                                },
+                                onVkLinkClick = {
+                                    activity?.let {
+                                        vkid.authorize(it, vkidCallback, VKIDAuthParams {
+                                        })
+                                    }
                                 },
                                 onBackClick = { authNavController.popBackStack() }
                             )
@@ -546,9 +572,15 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                         onLoginClick = { email, pass, rememberMe -> 
                                             viewModel.login(email, pass, rememberMe)
                                         },
-                                        onForgotPasswordClick = { viewModel.navigateToForgotPassword() },
+                                        onForgotPasswordClick = { navController.navigate("forgot_password") },
                                         onYandexLoginClick = {
                                             yandexLauncher.launch(YandexAuthLoginOptions())
+                                        },
+                                        onVkLoginClick = {
+                                            activity?.let {
+                                                vkid.authorize(it, vkidCallback, VKIDAuthParams {
+                                                })
+                                            }
                                         }
                                     )
                                 }
@@ -557,6 +589,13 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                         isLoading = false,
                                         onNavigateToLogin = { navController.navigate("login") },
                                         onRegisterClick = { email, pass, confirm -> viewModel.register(email, pass, confirm) }
+                                    )
+                                }
+                                composable("forgot_password") {
+                                    ForgotPasswordScreen(
+                                        isLoading = false,
+                                        onSendClick = { viewModel.forgotPassword(it) },
+                                        onBackClick = { navController.navigateUp() }
                                     )
                                 }
                             }

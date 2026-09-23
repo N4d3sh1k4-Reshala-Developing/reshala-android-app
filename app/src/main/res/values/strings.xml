@@ -21,6 +21,7 @@
     <string name="remember_me">Remember Me</string>
     <string name="forgot_password_q">Forgot Password?</string>
     <string name="sign_in_yandex">Sign in with Yandex</string>
+    <string name="sign_in_vk">Sign in with VK</string>
     <string name="dont_have_account">Don\'t have an account? Register</string>
     <string name="already_have_account">Already have an account? Login</string>
 
@@ -117,7 +118,9 @@
     <string name="username">Username</string>
     <string name="linked_services">Linked Services</string>
     <string name="link_yandex_desc">Link your Yandex account for easier login next time.</string>
+    <string name="link_vk_desc">Link your VK account for easier login next time.</string>
     <string name="connected">Connected</string>
     <string name="not_connected">Not connected</string>
     <string name="link_yandex">Link Yandex</string>
+    <string name="link_vk">Link VK</string>
 </resources>

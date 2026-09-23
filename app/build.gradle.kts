@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.vkid.manifest.placeholders)
 }
 
 fun getSecret(key: String, local: Properties): String {
@@ -48,6 +49,9 @@ android {
             storePassword = System.getenv("KEYSTORE_PASSWORD") ?: localProperties.getProperty("STORE_PASSWORD")
             keyAlias = System.getenv("KEY_ALIAS") ?: localProperties.getProperty("KEY_ALIAS")
             keyPassword = System.getenv("KEY_PASSWORD") ?: localProperties.getProperty("KEY_PASSWORD")
+
+            enableV1Signing = true
+            enableV2Signing = true
         }
     }
 
@@ -101,6 +105,7 @@ dependencies {
     implementation(libs.androidx.camera.extensions)
 
     implementation(libs.authsdk)
+    implementation(libs.vkid)
     
     // Markwon for Markdown and LaTeX rendering
     implementation(libs.markwon.core)

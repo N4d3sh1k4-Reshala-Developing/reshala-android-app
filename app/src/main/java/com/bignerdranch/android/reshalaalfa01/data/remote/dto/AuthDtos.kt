@@ -57,6 +57,14 @@ data class YandexLoginRequest(
 )
 
 @Serializable
+data class VkLoginRequest(
+    val code: String,
+    val codeVerifier: String,
+    val deviceId: String,
+    val state: String? = null
+)
+
+@Serializable
 data class LinkSocialRequest(
     val email: String,
     val password: String,

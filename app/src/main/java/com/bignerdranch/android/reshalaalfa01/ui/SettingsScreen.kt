@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 fun SettingsScreen(
     userData: UserData?,
     onYandexLinkClick: () -> Unit,
+    onVkLinkClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -159,6 +160,79 @@ fun SettingsScreen(
             if (!isYandexConnected) {
                 Text(
                     text = stringResource(R.string.link_yandex_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp, start = 4.dp, bottom = 16.dp)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // VK Section
+            val isVkConnected = userData?.identities?.any { it.provider.uppercase() == "VK" } ?: false
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = null,
+                                tint = if (isVkConnected) Color(0xFF0077FF) else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "VK",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = if (isVkConnected) stringResource(R.string.connected) else stringResource(R.string.not_connected),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (isVkConnected) Color(0xFF0077FF) else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        if (!isVkConnected) {
+                            Button(
+                                onClick = onVkLinkClick,
+                                shape = MaterialTheme.shapes.medium,
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF0077FF),
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.link_vk),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Verified,
+                                contentDescription = null,
+                                tint = Color(0xFF0077FF),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (!isVkConnected) {
+                Text(
+                    text = stringResource(R.string.link_vk_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp, start = 4.dp)
