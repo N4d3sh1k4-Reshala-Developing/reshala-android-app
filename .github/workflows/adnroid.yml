@@ -41,6 +41,8 @@ jobs:
           SCHEME: ${{ secrets.SCHEME }}
           HOST: ${{ secrets.HOST }}
           PORT: ${{ secrets.PORT }}
+          VK_CLIENT_ID: ${{ secrets.VK_CLIENT_ID }}
+          VK_CLIENT_SECRET: ${{ secrets.VK_CLIENT_SECRET }}
 
 
       - name: Upload APK
