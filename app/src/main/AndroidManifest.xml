@@ -7,6 +7,7 @@
     <uses-feature android:name="android.hardware.camera" />
 
     <application
+        android:name=".ReshalaApp"
         android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
