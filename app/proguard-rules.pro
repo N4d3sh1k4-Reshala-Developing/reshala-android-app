@@ -19,3 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Сохраняем информацию о типах для Retrofit и сериализации
+-keepattributes Signature, InnerClasses, EnclosingMethod
+-keepattributes *Annotation*
+-keep class retrofit2.** { *; }
+-keep interface retrofit2.** { *; }
+-dontwarn retrofit2.**
+
+# Если используете kotlinx.serialization
+-keepclassmembernames class * {
+    @kotlinx.serialization.SerialName <fields>;
+}
