@@ -35,6 +35,11 @@ fun MathLiveEditor(
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true
                     settings.allowFileAccess = true
+                    settings.allowContentAccess = true
+                    @Suppress("DEPRECATION")
+                    settings.allowFileAccessFromFileURLs = true
+                    @Suppress("DEPRECATION")
+                    settings.allowUniversalAccessFromFileURLs = true
                     setLayerType(View.LAYER_TYPE_HARDWARE, null)
                     setBackgroundColor(android.graphics.Color.TRANSPARENT)
                     
@@ -48,9 +53,9 @@ fun MathLiveEditor(
                             isLoaded = true
                             post {
                                 val escaped = latex.replace("\\", "\\\\").replace("'", "\\'")
-                                evaluateJavascript("setTheme($isDark); setLatex('$escaped');") {}
+                                evaluateJavascript("if (typeof setTheme === 'function') setTheme($isDark); if (typeof setLatex === 'function') setLatex('$escaped');") {}
                                 if (shouldFocus) {
-                                    evaluateJavascript("document.querySelector('math-field')?.focus();") {}
+                                    evaluateJavascript("var mf = document.querySelector('math-field'); if (mf) { mf.focus(); }") {}
                                 }
                             }
                         }
@@ -59,11 +64,17 @@ fun MathLiveEditor(
                     webViewClient = object : WebViewClient() {
                         override fun onPageFinished(view: WebView?, url: String?) {
                             val escaped = latex.replace("\\", "\\\\").replace("'", "\\'")
-                            evaluateJavascript("setTheme($isDark); setLatex('$escaped');") {}
+                            evaluateJavascript("if (typeof setTheme === 'function') setTheme($isDark); if (typeof setLatex === 'function') setLatex('$escaped');") {}
                         }
                     }
                     
-                    loadUrl("file:///android_asset/mathlive.html")
+                    val htmlContent = try {
+                        ctx.assets.open("mathlive.html").bufferedReader().use { it.readText() }
+                    } catch (e: Exception) {
+                        "<!DOCTYPE html><html><body>Error loading editor</body></html>"
+                    }
+
+                    loadDataWithBaseURL("file:///android_asset/", htmlContent, "text/html", "UTF-8", null)
                     webViewRef = this
                 }
             },

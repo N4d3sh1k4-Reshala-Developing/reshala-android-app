@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.util.Log
+import java.util.concurrent.Executors
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
@@ -55,7 +56,16 @@ fun CameraScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
-    val imageCapture = remember { ImageCapture.Builder().build() }
+    val imageCapture = remember {
+        ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            .build()
+    }
+
+    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+    DisposableEffect(Unit) {
+        onDispose { cameraExecutor.shutdown() }
+    }
 
     var capturedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var isCapturing by remember { mutableStateOf(false) }
@@ -96,28 +106,44 @@ fun CameraScreen(
         }
     }
     
-    LaunchedEffect(hasCameraPermission) {
+    DisposableEffect(hasCameraPermission) {
         if (hasCameraPermission) {
-            val cameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder().build()
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-            
+            val executor = ContextCompat.getMainExecutor(context)
+            cameraProviderFuture.addListener({
+                try {
+                    val cameraProvider = cameraProviderFuture.get()
+                    val preview = Preview.Builder().build()
+                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                    
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(
+                        lifecycleOwner,
+                        cameraSelector,
+                        preview,
+                        imageCapture
+                    )
+                    preview.setSurfaceProvider(previewView.surfaceProvider)
+                } catch (e: Exception) {
+                    Log.e("CameraScreen", "Use case binding failed", e)
+                }
+            }, executor)
+        }
+        onDispose {
             try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
-                    lifecycleOwner,
-                    cameraSelector,
-                    preview,
-                    imageCapture
-                )
-                preview.setSurfaceProvider(previewView.surfaceProvider)
+                if (cameraProviderFuture.isDone) {
+                    cameraProviderFuture.get().unbindAll()
+                }
             } catch (e: Exception) {
-                Log.e("CameraScreen", "Use case binding failed", e)
+                Log.e("CameraScreen", "Unbind on dispose failed", e)
             }
         }
     }
     
     Box(modifier = Modifier.fillMaxSize()) {
+        if (hasCameraPermission) {
+            AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
+        }
+
         val bitmap = capturedBitmap
         if (bitmap != null) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -140,7 +166,6 @@ fun CameraScreen(
                 )
             }
         } else if (hasCameraPermission) {
-            AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
             
             // Simple overlay with Shutter button
             Box(modifier = Modifier.fillMaxSize()) {
@@ -165,17 +190,23 @@ fun CameraScreen(
                         FloatingActionButton(
                             onClick = {
                                 isCapturing = true
+                                val mainExecutor = ContextCompat.getMainExecutor(context)
                                 imageCapture.takePicture(
-                                    ContextCompat.getMainExecutor(context),
+                                    cameraExecutor,
                                     object : ImageCapture.OnImageCapturedCallback() {
                                         override fun onCaptureSuccess(image: ImageProxy) {
-                                            capturedBitmap = imageProxyToBitmap(image)
+                                            val bitmap = imageProxyToBitmap(image)
                                             image.close()
-                                            isCapturing = false
+                                            mainExecutor.execute {
+                                                capturedBitmap = bitmap
+                                                isCapturing = false
+                                            }
                                         }
                                         override fun onError(exception: ImageCaptureException) {
                                             Log.e("CameraScreen", "Capture failed", exception)
-                                            isCapturing = false
+                                            mainExecutor.execute {
+                                                isCapturing = false
+                                            }
                                         }
                                     }
                                 )
@@ -211,14 +242,20 @@ fun CameraScreen(
     }
 }
 
-private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
-    val buffer = image.planes[0].buffer
-    val bytes = ByteArray(buffer.remaining())
-    buffer.get(bytes)
-    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-    val matrix = Matrix()
-    matrix.postRotate(image.imageInfo.rotationDegrees.toFloat())
-    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+private fun imageProxyToBitmap(image: ImageProxy): Bitmap? {
+    return try {
+        val buffer = image.planes[0].buffer
+        val bytes = ByteArray(buffer.remaining())
+        buffer.get(bytes)
+        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return null
+        val rotation = image.imageInfo.rotationDegrees.toFloat()
+        if (rotation == 0f) return bitmap
+        val matrix = Matrix().apply { postRotate(rotation) }
+        Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    } catch (e: Exception) {
+        Log.e("CameraScreen", "imageProxyToBitmap failed", e)
+        null
+    }
 }
 
 @Composable

@@ -51,9 +51,10 @@
     <math-field id="mf"></math-field>
 
     <script>
-        // Настройка путей к шрифтам для локальной работы
-        window.MathfieldElement.fontsDirectory = "./fonts";
-        const mf = document.getElementById('mf');
+        if (window.MathfieldElement) {
+            window.MathfieldElement.fontsDirectory = "./fonts";
+        }
+        var mf = document.getElementById('mf');
 
         function setTheme(isDark) {
             document.body.style.setProperty('--text-color', isDark ? 'white' : 'black');
@@ -61,7 +62,7 @@
 
         function setLatex(latex) {
             if (!mf) return;
-            const cleanLatex = latex.replace(/\\\\/g, '\\');
+            var cleanLatex = latex.replace(/\\\\/g, '\\');
             mf.setValue(cleanLatex, {suppressChangeNotifications: true});
         }
 
@@ -69,24 +70,22 @@
             return mf ? mf.getValue() : "";
         }
 
-        mf.addEventListener('input', (ev) => {
-            if (window.Android) {
-                window.Android.onContentChanged(mf.getValue());
-            }
+        if (mf) {
+            mf.addEventListener('input', function() {
+                if (window.Android) {
+                    window.Android.onContentChanged(mf.getValue());
+                }
+            });
+
+            mf.smartFence = true;
+            mf.virtualKeyboardMode = "onfocus";
+        }
+
+        document.body.addEventListener('click', function() {
+            if (mf) mf.focus();
         });
 
-        document.body.addEventListener('click', () => mf.focus());
-
-        mf.smartFence = true;
-        mf.virtualKeyboardMode = "onfocus";
-        mf.setOptions({
-            virtualKeyboardToggleGlyph: "",
-            menuToggleGlyph: "",
-            smartFraction: true, // Включает создание вертикальной дроби при нажатии "/"
-            smartFence: true    // Умные скобки
-        });
-
-        window.addEventListener('load', () => {
+        window.addEventListener('load', function() {
             if (window.Android) {
                 window.Android.onReady();
             }

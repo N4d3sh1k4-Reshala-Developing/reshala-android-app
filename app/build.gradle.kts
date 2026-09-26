@@ -97,6 +97,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.webkit)
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)

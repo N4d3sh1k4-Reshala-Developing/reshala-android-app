@@ -22,6 +22,7 @@ camerax = "1.4.0"
 markwon = "4.6.2"
 vkid = "2.7.2"
 vkid-plugin = "1.1.0"
+webkit = "1.12.0"
 
 [libraries]
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
@@ -57,6 +58,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
+androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
 markwon-ext-latex = { group = "io.noties.markwon", name = "ext-latex", version.ref = "markwon" }
 markwon-inline-parser = { group = "io.noties.markwon", name = "inline-parser", version.ref = "markwon" }
