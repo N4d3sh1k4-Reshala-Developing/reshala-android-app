@@ -69,7 +69,11 @@ data class LinkSocialRequest(
     val email: String,
     val password: String,
     val provider: String,
-    val providerUserId: String
+    val code: String? = null,
+    val codeVerifier: String? = null,
+    val deviceId: String? = null,
+    val state: String? = null,
+    val accessToken: String? = null
 )
 
 @Serializable

@@ -206,29 +206,63 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
     val vkid = remember { VKID.instance }
     var currentVkCodeVerifier by remember { mutableStateOf<String?>(null) }
     var currentVkState by remember { mutableStateOf<String?>(null) }
+    var pendingLinkPassword by remember { mutableStateOf<String?>(null) }
     
     val vkidCallback: VKIDAuthCallback = remember {
         object : VKIDAuthCallback {
             override fun onAuth(accessToken: AccessToken) {}
             override fun onAuthCode(data: AuthCodeData, isCompletion: Boolean) {
-                viewModel.loginWithVk(
-                    code = data.code,
-                    codeVerifier = currentVkCodeVerifier,
-                    deviceId = data.deviceId,
-                    state = currentVkState
-                )
+                val pass = pendingLinkPassword
+                if (pass != null) {
+                    val currentState = viewModel.authState.value as? AuthState.SocialLinkRequired
+                    val email = currentState?.email ?: ""
+                    pendingLinkPassword = null
+                    viewModel.linkSocialWithVk(
+                        email = email,
+                        pass = pass,
+                        code = data.code,
+                        codeVerifier = currentVkCodeVerifier,
+                        deviceId = data.deviceId,
+                        state = currentVkState
+                    )
+                } else {
+                    viewModel.loginWithVk(
+                        code = data.code,
+                        codeVerifier = currentVkCodeVerifier,
+                        deviceId = data.deviceId,
+                        state = currentVkState
+                    )
+                }
             }
-            override fun onFail(fail: VKIDAuthFail) {}
+            override fun onFail(fail: VKIDAuthFail) {
+                pendingLinkPassword = null
+            }
         }
     }
 
     val yandexLauncher = rememberLauncherForActivityResult(yandexAuthSdk.contract) { result ->
         when (result) {
             is YandexAuthResult.Success -> {
-                viewModel.loginWithYandex(result.token.value)
+                val pass = pendingLinkPassword
+                if (pass != null) {
+                    val currentState = viewModel.authState.value as? AuthState.SocialLinkRequired
+                    val email = currentState?.email ?: ""
+                    pendingLinkPassword = null
+                    viewModel.linkSocialWithYandex(
+                        email = email,
+                        pass = pass,
+                        accessToken = result.token.value
+                    )
+                } else {
+                    viewModel.loginWithYandex(result.token.value)
+                }
             }
-            is YandexAuthResult.Failure -> {}
-            is YandexAuthResult.Cancelled -> {}
+            is YandexAuthResult.Failure -> {
+                pendingLinkPassword = null
+            }
+            is YandexAuthResult.Cancelled -> {
+                pendingLinkPassword = null
+            }
         }
     }
 
@@ -528,8 +562,30 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                 email = state.email,
                                 error = state.error,
                                 isLoading = false,
-                                onLinkClick = { viewModel.linkSocial(it) },
-                                onBackClick = { viewModel.resetToLogin() }
+                                onLinkClick = { password ->
+                                    pendingLinkPassword = password
+                                    if (state.provider.equals("VK", ignoreCase = true)) {
+                                        val verifier = PkceUtils.generateCodeVerifier()
+                                        val challenge = PkceUtils.generateCodeChallenge(verifier)
+                                        val stateVal = UUID.randomUUID().toString()
+
+                                        currentVkCodeVerifier = verifier
+                                        currentVkState = stateVal
+
+                                        activity?.let {
+                                            vkid.authorize(it, vkidCallback, VKIDAuthParams {
+                                                this.codeChallenge = challenge
+                                                this.state = stateVal
+                                            })
+                                        }
+                                    } else if (state.provider.equals("YANDEX", ignoreCase = true)) {
+                                        yandexLauncher.launch(YandexAuthLoginOptions())
+                                    }
+                                },
+                                onBackClick = {
+                                    pendingLinkPassword = null
+                                    viewModel.resetToLogin()
+                                }
                             )
                         }
                         is AuthState.EmailVerified -> {

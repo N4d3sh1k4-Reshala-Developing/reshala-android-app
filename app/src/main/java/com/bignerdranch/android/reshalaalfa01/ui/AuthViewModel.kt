@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bignerdranch.android.reshalaalfa01.data.AuthRepository
 import com.bignerdranch.android.reshalaalfa01.data.local.RecognitionEntity
+import com.bignerdranch.android.reshalaalfa01.data.remote.dto.LinkSocialRequest
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.LoginRequest
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.RegisterRequest
 import com.bignerdranch.android.reshalaalfa01.data.remote.dto.ResetPasswordRequest
@@ -27,7 +28,7 @@ sealed class AuthState {
     data class SocialLinkRequired(
         val email: String,
         val provider: String,
-        val providerUserId: String,
+        val providerUserId: String? = null,
         val error: String? = null
     ) : AuthState()
     object EmailVerified : AuthState()
@@ -146,23 +147,28 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         result.onSuccess { loginResponse ->
             val data = loginResponse.data
             val errorCode = loginResponse.error?.code ?: data?.error
+            val message = loginResponse.error?.message ?: data?.error ?: "Login failed"
             
             if (errorCode == "EMAIL_NOT_VERIFIED") {
                 resendConfirmation(email)
                 _authState.value = AuthState.AwaitingVerification(email)
-            } else if (errorCode?.equals("email_exists_link_required", ignoreCase = true) == true) {
+            } else if (errorCode?.equals("EMAIL_EXISTS_LINK_REQUIRED", ignoreCase = true) == true) {
                 _authState.value = AuthState.SocialLinkRequired(
                     email = data?.email ?: email,
-                    provider = data?.provider ?: "",
-                    providerUserId = data?.providerUserId ?: ""
+                    provider = data?.provider ?: ""
                 )
+            } else if (errorCode?.equals("SOCIAL_ACCOUNT_ALREADY_LINKED", ignoreCase = true) == true) {
+                _authState.value = AuthState.Error("Этот аккаунт соцсети уже привязан к другому профилю.")
+            } else if (errorCode?.contains("PROOF_REQUIRED", ignoreCase = true) == true ||
+                       errorCode?.contains("TOKEN_EXCHANGE_FAILED", ignoreCase = true) == true ||
+                       errorCode?.contains("USER_INFO_FAILED", ignoreCase = true) == true) {
+                _authState.value = AuthState.Error("Ошибка подтверждения соцсети. Попробуйте войти снова.")
             } else if (loginResponse.success && data?.accessToken != null) {
                 _authState.value = AuthState.Authenticated
                 fetchUserData()
                 refreshHistory()
             } else {
                 val currentState = _authState.value
-                val message = loginResponse.error?.message ?: data?.error ?: "Login failed"
                 if (currentState is AuthState.SocialLinkRequired) {
                     _authState.value = currentState.copy(error = message)
                 } else {
@@ -180,19 +186,36 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    fun linkSocial(password: String) {
-        val currentState = _authState.value as? AuthState.SocialLinkRequired ?: return
+    fun linkSocialWithVk(email: String, pass: String, code: String, codeVerifier: String?, deviceId: String, state: String?) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             val result = repository.linkSocial(
-                com.bignerdranch.android.reshalaalfa01.data.remote.dto.LinkSocialRequest(
-                    email = currentState.email,
-                    password = password,
-                    provider = currentState.provider,
-                    providerUserId = currentState.providerUserId
+                LinkSocialRequest(
+                    email = email,
+                    password = pass,
+                    provider = "VK",
+                    code = code,
+                    codeVerifier = codeVerifier,
+                    deviceId = deviceId,
+                    state = state
                 )
             )
-            handleAuthResult(result, currentState.email)
+            handleAuthResult(result, email)
+        }
+    }
+
+    fun linkSocialWithYandex(email: String, pass: String, accessToken: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            val result = repository.linkSocial(
+                LinkSocialRequest(
+                    email = email,
+                    password = pass,
+                    provider = "YANDEX",
+                    accessToken = accessToken
+                )
+            )
+            handleAuthResult(result, email)
         }
     }
 
