@@ -186,6 +186,10 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
+    fun startSocialLink(email: String, provider: String) {
+        _authState.value = AuthState.SocialLinkRequired(email = email, provider = provider)
+    }
+
     fun linkSocialWithVk(email: String, pass: String, code: String, codeVerifier: String?, deviceId: String, state: String?) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading

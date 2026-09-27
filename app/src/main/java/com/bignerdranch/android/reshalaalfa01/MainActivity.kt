@@ -304,22 +304,12 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                             SettingsScreen(
                                 userData = userData,
                                 onYandexLinkClick = {
-                                    yandexLauncher.launch(YandexAuthLoginOptions())
+                                    val email = userData?.email ?: ""
+                                    viewModel.startSocialLink(email, "YANDEX")
                                 },
                                 onVkLinkClick = {
-                                    val verifier = PkceUtils.generateCodeVerifier()
-                                    val challenge = PkceUtils.generateCodeChallenge(verifier)
-                                    val stateVal = UUID.randomUUID().toString()
-
-                                    currentVkCodeVerifier = verifier
-                                    currentVkState = stateVal
-
-                                    activity?.let {
-                                        vkid.authorize(it, vkidCallback, VKIDAuthParams {
-                                            this.codeChallenge = challenge
-                                            this.state = stateVal
-                                        })
-                                    }
+                                    val email = userData?.email ?: ""
+                                    viewModel.startSocialLink(email, "VK")
                                 },
                                 onBackClick = { authNavController.popBackStack() }
                             )
@@ -576,6 +566,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                             vkid.authorize(it, vkidCallback, VKIDAuthParams {
                                                 this.codeChallenge = challenge
                                                 this.state = stateVal
+                                                this.scopes = setOf("email", "phone")
                                             })
                                         }
                                     } else if (state.provider.equals("YANDEX", ignoreCase = true)) {
@@ -662,6 +653,7 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                                 vkid.authorize(it, vkidCallback, VKIDAuthParams {
                                                     this.codeChallenge = challenge
                                                     this.state = stateVal
+                                                    this.scopes = setOf("email", "phone")
                                                 })
                                             }
                                         }
