@@ -40,9 +40,10 @@ class AuthRepository(
         }
     }
 
-    suspend fun loginWithVk(code: String, codeVerifier: String, deviceId: String, state: String?): Result<LoginResponse> {
+    suspend fun loginWithVk(code: String, codeVerifier: String?, deviceId: String, state: String?): Result<LoginResponse> {
         return try {
-            val response = apiService.loginWithVk(VkLoginRequest(code, codeVerifier, deviceId, state))
+            val verifier = codeVerifier?.ifEmpty { null }
+            val response = apiService.loginWithVk(VkLoginRequest(code, verifier, deviceId, state))
             handleLoginResponse(response)
         } catch (e: Exception) {
             Result.failure(e)

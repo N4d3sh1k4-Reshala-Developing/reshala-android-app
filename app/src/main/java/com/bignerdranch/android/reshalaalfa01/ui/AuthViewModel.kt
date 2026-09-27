@@ -134,7 +134,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    fun loginWithVk(code: String, codeVerifier: String, deviceId: String, state: String?) {
+    fun loginWithVk(code: String, codeVerifier: String?, deviceId: String, state: String?) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             val result = repository.loginWithVk(code, codeVerifier, deviceId, state)

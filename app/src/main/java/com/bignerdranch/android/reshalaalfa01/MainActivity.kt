@@ -55,7 +55,9 @@ import com.vk.id.VKIDAuthFail
 import com.vk.id.auth.VKIDAuthCallback
 import com.vk.id.auth.VKIDAuthParams
 import com.vk.id.auth.AuthCodeData
+import com.bignerdranch.android.reshalaalfa01.ui.util.PkceUtils
 import java.util.Locale
+import java.util.UUID
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -202,12 +204,19 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
     val yandexAuthSdk = remember { YandexAuthSdk.create(authOptions) }
 
     val vkid = remember { VKID.instance }
+    var currentVkCodeVerifier by remember { mutableStateOf<String?>(null) }
+    var currentVkState by remember { mutableStateOf<String?>(null) }
     
     val vkidCallback: VKIDAuthCallback = remember {
         object : VKIDAuthCallback {
             override fun onAuth(accessToken: AccessToken) {}
             override fun onAuthCode(data: AuthCodeData, isCompletion: Boolean) {
-                viewModel.loginWithVk(data.code, "", data.deviceId, null)
+                viewModel.loginWithVk(
+                    code = data.code,
+                    codeVerifier = currentVkCodeVerifier,
+                    deviceId = data.deviceId,
+                    state = currentVkState
+                )
             }
             override fun onFail(fail: VKIDAuthFail) {}
         }
@@ -264,8 +273,17 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                     yandexLauncher.launch(YandexAuthLoginOptions())
                                 },
                                 onVkLinkClick = {
+                                    val verifier = PkceUtils.generateCodeVerifier()
+                                    val challenge = PkceUtils.generateCodeChallenge(verifier)
+                                    val stateVal = UUID.randomUUID().toString()
+
+                                    currentVkCodeVerifier = verifier
+                                    currentVkState = stateVal
+
                                     activity?.let {
                                         vkid.authorize(it, vkidCallback, VKIDAuthParams {
+                                            this.codeChallenge = challenge
+                                            this.state = stateVal
                                         })
                                     }
                                 },
@@ -577,8 +595,17 @@ fun AuthNavigation(viewModel: AuthViewModel, recognitionViewModel: RecognitionVi
                                             yandexLauncher.launch(YandexAuthLoginOptions())
                                         },
                                         onVkLoginClick = {
+                                            val verifier = PkceUtils.generateCodeVerifier()
+                                            val challenge = PkceUtils.generateCodeChallenge(verifier)
+                                            val stateVal = UUID.randomUUID().toString()
+
+                                            currentVkCodeVerifier = verifier
+                                            currentVkState = stateVal
+
                                             activity?.let {
                                                 vkid.authorize(it, vkidCallback, VKIDAuthParams {
+                                                    this.codeChallenge = challenge
+                                                    this.state = stateVal
                                                 })
                                             }
                                         }
